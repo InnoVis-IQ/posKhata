@@ -8,6 +8,18 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::create('units', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('shop_id')->constrained()->cascadeOnDelete();
+            $table->string('name');
+            $table->string('code', 50);
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+
+            $table->unique(['shop_id', 'code']);
+            $table->index(['shop_id', 'name']);
+        });
+
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('shop_id')->constrained()->cascadeOnDelete();
@@ -24,11 +36,17 @@ return new class extends Migration
             $table->id();
             $table->foreignId('shop_id')->constrained()->cascadeOnDelete();
             $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('unit_id')->constrained('units')->restrictOnDelete();
             $table->string('name');
             $table->string('sku', 100)->nullable();
             $table->string('barcode', 100)->nullable();
-            $table->bigInteger('price')->default(0);
-            $table->bigInteger('cost')->default(0);
+            $table->bigInteger('unit_cost')->default(0);
+            $table->bigInteger('unit_sale_price')->default(0); // tax-inclusive
+            $table->bigInteger('tax')->default(0); // tax amount in minor units; default from shop tax_rate_bps, overridable
+            $table->bigInteger('unit_discount')->default(0);
+            $table->bigInteger('final_unit_price')->default(0); // unit_sale_price - unit_discount
+            $table->decimal('batch_size', 12, 3)->default(0); // 0 = no batch deal
+            $table->bigInteger('batch_discount')->default(0); // off per full batch of batch_size
             $table->decimal('reorder_level', 12, 3)->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
@@ -43,5 +61,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('products');
         Schema::dropIfExists('categories');
+        Schema::dropIfExists('units');
     }
 };

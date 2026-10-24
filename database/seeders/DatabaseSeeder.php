@@ -66,5 +66,22 @@ class DatabaseSeeder extends Seeder
             'user_id' => $userId,
             'created_at' => $now,
         ]);
+
+        foreach ([
+            ['name' => 'Piece', 'code' => 'pcs'],
+            ['name' => 'Kilogram', 'code' => 'kg'],
+            ['name' => 'Liter', 'code' => 'l'],
+            ['name' => 'Dozen', 'code' => 'dozen'],
+            ['name' => 'Pack', 'code' => 'pack'],
+        ] as $unit) {
+            DB::table('units')->insert([
+                'shop_id' => $shopId,
+                'name' => $unit['name'],
+                'code' => $unit['code'],
+                'is_active' => true,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
     }
 };
