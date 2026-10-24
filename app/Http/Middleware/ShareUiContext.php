@@ -2,8 +2,13 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Branch;
+use App\Models\RegisterSession;
+use App\Models\Shop;
+use App\Support\PosContext;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -11,35 +16,66 @@ class ShareUiContext
 {
     public function handle(Request $request, Closure $next): Response
     {
-        View::share('viewer', (object) [
-            'name' => session('viewer.name', 'Demo Admin'),
-            'email' => session('viewer.email', 'admin@poskhata.local'),
-            'role' => session('viewer.role', 'admin'),
-        ]);
+        if (Auth::check()) {
+            try {
+                $shop = PosContext::shop();
+                $branch = PosContext::branch();
+                $user = PosContext::user();
+                $branches = $user->isAdmin() || $user->isSuperadmin()
+                    ? Branch::query()->where('shop_id', $shop->id)->where('is_active', true)->orderBy('name')->get()
+                    : $user->branches()->where('branches.is_active', true)->orderBy('name')->get();
 
-        View::share('shop', (object) [
-            'name' => session('shop.name', 'posKhata Shop'),
-            'logo_path' => session('shop.logo_path'),
-            'brand_tag' => session('shop.brand_tag'),
-            'address' => session('shop.address'),
-            'phone' => session('shop.phone'),
-            'receipt_header' => session('shop.receipt_header'),
-            'receipt_footer' => session('shop.receipt_footer'),
-            'currency_code' => session('shop.currency_code', 'PKR'),
-            'currency_minor_units' => (int) session('shop.currency_minor_units', 2),
-            'tax_rate_bps' => (int) session('shop.tax_rate_bps', 0),
-            'default_khaata_warning_amount' => (int) session('shop.default_khaata_warning_amount', 0),
-            'multi_branch_enabled' => (bool) session('shop.multi_branch_enabled', false),
-        ]);
+                if ($branches->isEmpty() && $user->homeBranch) {
+                    $branches = collect([$user->homeBranch]);
+                }
 
-        $branches = collect([
-            (object) ['id' => 1, 'name' => 'Main', 'code' => 'MAIN'],
-        ]);
-
-        View::share('branches', $branches);
-        View::share('currentBranch', $branches->first());
-        View::share('registerOpen', (bool) session('register_open', false));
+                View::share('viewer', (object) [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                ]);
+                View::share('shop', $shop);
+                View::share('branches', $branches);
+                View::share('currentBranch', $branch);
+                View::share('registerOpen', RegisterSession::query()
+                    ->where('branch_id', $branch->id)
+                    ->where('status', 'open')
+                    ->exists());
+            } catch (\Throwable) {
+                $this->shareGuestDefaults();
+            }
+        } else {
+            $this->shareGuestDefaults();
+        }
 
         return $next($request);
+    }
+
+    private function shareGuestDefaults(): void
+    {
+        $shop = Shop::query()->first();
+
+        View::share('viewer', (object) [
+            'name' => 'Guest',
+            'email' => '',
+            'role' => 'cashier',
+        ]);
+        View::share('shop', $shop ?? (object) [
+            'name' => 'posKhata',
+            'logo_path' => null,
+            'brand_tag' => null,
+            'address' => null,
+            'phone' => null,
+            'receipt_header' => null,
+            'receipt_footer' => null,
+            'currency_code' => 'PKR',
+            'currency_minor_units' => 2,
+            'tax_rate_bps' => 0,
+            'default_khaata_warning_amount' => 0,
+            'multi_branch_enabled' => false,
+        ]);
+        View::share('branches', collect());
+        View::share('currentBranch', (object) ['id' => 0, 'name' => '—', 'code' => '']);
+        View::share('registerOpen', false);
     }
 }

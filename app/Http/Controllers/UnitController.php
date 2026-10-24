@@ -2,31 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Concerns\Tier3Stub;
+use App\Http\Controllers\Concerns\GatesRoles;
+use App\Models\Unit;
+use App\Support\PosContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-class UnitController extends Controller
+class UnitController extends Controller implements HasMiddleware
 {
-    use Tier3Stub;
+    use GatesRoles;
 
-    public function __construct()
+    public static function middleware(): array
     {
-        // Tier 2 preview gate; Tier 3 will use policies.
-        if (session('viewer.role', 'admin') !== 'superadmin') {
-            abort(403, 'Only superadmin can manage units.');
-        }
+        return [self::superadminOnly()];
     }
 
     public function index(): View
     {
         return view('units.index', [
-            'units' => collect([
-                (object) ['id' => 1, 'name' => 'Piece', 'code' => 'pcs', 'is_active' => true],
-                (object) ['id' => 2, 'name' => 'Kilogram', 'code' => 'kg', 'is_active' => true],
-                (object) ['id' => 3, 'name' => 'Dozen', 'code' => 'dozen', 'is_active' => true],
-            ]),
+            'units' => Unit::query()->where('shop_id', PosContext::shopId())->orderBy('name')->get(),
         ]);
     }
 
@@ -37,23 +34,45 @@ class UnitController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        return $this->tier3Pending();
+        $data = $this->validated($request);
+
+        Unit::create($data + ['shop_id' => PosContext::shopId()]);
+
+        return redirect()->route('units.index')->with('status', 'Unit created.');
     }
 
     public function edit(int $unit): View
     {
-        return view('units.form', [
-            'unit' => (object) [
-                'id' => $unit,
-                'name' => '',
-                'code' => '',
-                'is_active' => true,
-            ],
-        ]);
+        return view('units.form', ['unit' => $this->find($unit)]);
     }
 
     public function update(Request $request, int $unit): RedirectResponse
     {
-        return $this->tier3Pending();
+        $model = $this->find($unit);
+        $model->update($this->validated($request, $model));
+
+        return redirect()->route('units.index')->with('status', 'Unit updated.');
+    }
+
+    private function find(int $id): Unit
+    {
+        return Unit::query()->where('shop_id', PosContext::shopId())->findOrFail($id);
+    }
+
+    private function validated(Request $request, ?Unit $unit = null): array
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'code' => [
+                'required', 'string', 'max:50',
+                Rule::unique('units', 'code')
+                    ->where('shop_id', PosContext::shopId())
+                    ->ignore($unit?->id),
+            ],
+        ]);
+
+        $data['is_active'] = $request->boolean('is_active');
+
+        return $data;
     }
 }

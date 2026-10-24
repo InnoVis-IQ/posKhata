@@ -2,46 +2,56 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function showLogin(): View
+    public function showLogin(): View|RedirectResponse
     {
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+
         return view('auth.login');
     }
 
-    /**
-     * Tier 2 preview login — sets session viewer for nav/role demos.
-     * Tier 3 replaces with real Auth::attempt (unscoped for superadmin).
-     */
     public function login(Request $request): RedirectResponse
     {
-        $data = $request->validate([
+        $credentials = $request->validate([
             'email' => ['required', 'email'],
-            'role' => ['required', 'in:superadmin,admin,cashier'],
-            'name' => ['nullable', 'string', 'max:255'],
+            'password' => ['required', 'string'],
         ]);
 
+        // Unscoped lookup so superadmin can sign in.
+        $user = User::withoutSuperadminScope()
+            ->where('email', $credentials['email'])
+            ->where('is_active', true)
+            ->first();
+
+        if (! $user || ! Auth::getProvider()->validateCredentials($user, $credentials)) {
+            return back()
+                ->withErrors(['email' => 'Invalid credentials.'])
+                ->onlyInput('email');
+        }
+
+        Auth::login($user, $request->boolean('remember'));
+        $request->session()->regenerate();
         session([
-            'viewer.name' => $data['name'] ?: match ($data['role']) {
-                'superadmin' => 'Superadmin',
-                'cashier' => 'Cashier',
-                default => 'Admin',
-            },
-            'viewer.email' => $data['email'],
-            'viewer.role' => $data['role'],
-            'viewer.preview' => true,
+            'current_branch_id' => $user->branch_id,
         ]);
 
-        return redirect()->route('dashboard');
+        return redirect()->intended(route('dashboard'));
     }
 
-    public function logout(): RedirectResponse
+    public function logout(Request $request): RedirectResponse
     {
-        session()->forget(['viewer.name', 'viewer.email', 'viewer.role', 'viewer.preview']);
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return redirect()->route('login');
     }

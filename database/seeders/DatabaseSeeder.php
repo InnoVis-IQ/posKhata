@@ -83,5 +83,30 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => $now,
             ]);
         }
+
+        foreach ([
+            ['name' => 'Admin', 'email' => 'admin@poskhata.local', 'role' => 'admin'],
+            ['name' => 'Cashier', 'email' => 'cashier@poskhata.local', 'role' => 'cashier'],
+        ] as $staff) {
+            $staffId = DB::table('users')->insertGetId([
+                'shop_id' => $shopId,
+                'branch_id' => $branchId,
+                'name' => $staff['name'],
+                'email' => $staff['email'],
+                'email_verified_at' => $now,
+                'password' => Hash::make('password'),
+                'role' => $staff['role'],
+                'is_active' => true,
+                'remember_token' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+
+            DB::table('branch_user')->insert([
+                'branch_id' => $branchId,
+                'user_id' => $staffId,
+                'created_at' => $now,
+            ]);
+        }
     }
 };

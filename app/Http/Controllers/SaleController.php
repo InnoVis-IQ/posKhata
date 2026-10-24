@@ -2,26 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Sale;
+use App\Support\PosContext;
 use Illuminate\View\View;
 
 class SaleController extends Controller
 {
     public function receipt(int $sale): View
     {
-        return view('sales.receipt', [
-            'sale' => (object) [
-                'id' => $sale,
-                'sale_number' => 'S-'.str_pad((string) $sale, 5, '0', STR_PAD_LEFT),
-                'sold_at' => now(),
-                'subtotal' => 0,
-                'discount_total' => 0,
-                'tax_total' => 0,
-                'total' => 0,
-                'cashier_name' => 'Cashier',
-                'customer_name' => null,
-                'lines' => collect(),
-                'payments' => collect(),
-            ],
-        ]);
+        $model = Sale::query()
+            ->where('shop_id', PosContext::shopId())
+            ->with(['lines.product', 'payments', 'cashier', 'customer'])
+            ->findOrFail($sale);
+
+        $model->lines->each(fn ($line) => $line->setAttribute('name', $line->product?->name ?? 'Item #'.$line->product_id));
+        $model->setAttribute('cashier_name', $model->cashier?->name);
+        $model->setAttribute('customer_name', $model->customer?->name);
+
+        return view('sales.receipt', ['sale' => $model]);
     }
 }
