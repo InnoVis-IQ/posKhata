@@ -27,7 +27,7 @@
             </div>
             <nav class="flex-1 space-y-1 overflow-y-auto p-3 text-sm">
                 <a href="{{ route('dashboard') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Dashboard</a>
-                <a href="{{ route('pos.index') }}" class="block rounded-lg px-3 py-2 font-medium text-accent hover:bg-surface">POS</a>
+                <a href="{{ route('pos.index') }}" class="block rounded-lg bg-accent/10 px-3 py-2 font-medium text-accent hover:bg-accent/15">POS</a>
                 <a href="{{ route('register.show') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Register</a>
                 <a href="{{ route('customers.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Customers / Khaata</a>
 
