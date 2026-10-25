@@ -109,5 +109,7 @@ class DatabaseSeeder extends Seeder
                 'created_at' => $now,
             ]);
         }
+
+        $this->call(DummyDataSeeder::class);
     }
 }
