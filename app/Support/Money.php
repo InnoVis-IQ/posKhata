@@ -5,24 +5,22 @@ namespace App\Support;
 class Money
 {
     /**
-     * Format an integer amount in minor units (e.g. paisa) as a decimal string.
+     * Round an amount in major currency units (e.g. PKR rupees) to the shop decimal places.
      *
-     * Money(12345, 2) => "123.45", Money(-5, 2) => "-0.05", Money(500, 0) => "500".
+     * Money::round(2195.456) => 2195.46
      */
-    public static function format(int $minor, int $minorUnits = 2): string
+    public static function round(float|int|string $amount, int $decimals = 2): float
     {
-        $minorUnits = max(0, $minorUnits);
-        $negative = $minor < 0;
-        $abs = (string) ($negative ? -$minor : $minor);
+        return round((float) $amount, max(0, $decimals));
+    }
 
-        if ($minorUnits === 0) {
-            return ($negative ? '-' : '').$abs;
-        }
-
-        $abs = str_pad($abs, $minorUnits + 1, '0', STR_PAD_LEFT);
-        $whole = substr($abs, 0, -$minorUnits);
-        $fraction = substr($abs, -$minorUnits);
-
-        return ($negative ? '-' : '').$whole.'.'.$fraction;
+    /**
+     * Format a major-unit amount as a fixed decimal string.
+     *
+     * Money::format(2195) => "2195.00", Money::format(-0.5) => "-0.50"
+     */
+    public static function format(float|int|string $amount, int $decimals = 2): string
+    {
+        return number_format((float) $amount, max(0, $decimals), '.', '');
     }
 }

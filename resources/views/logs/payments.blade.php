@@ -64,7 +64,7 @@
                     @foreach ($entries as $entry)
                         @php
                             $in = $entry->direction === 'in';
-                            $amount = \App\Support\Money::format((int) $entry->amount, $minorUnits);
+                            $amount = \App\Support\Money::format($entry->amount, $minorUnits);
                         @endphp
                         <tr class="border-b border-line last:border-0">
                             <td class="px-4 py-3 whitespace-nowrap">{{ $entry->when }}</td>

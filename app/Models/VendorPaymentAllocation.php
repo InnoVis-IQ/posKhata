@@ -17,7 +17,7 @@ class VendorPaymentAllocation extends Model
     protected function casts(): array
     {
         return [
-            'amount' => 'integer',
+            'amount' => 'decimal:2',
             'created_at' => 'datetime',
         ];
     }

@@ -172,7 +172,7 @@ class LogController extends Controller implements HasMiddleware
                 'kind' => 'sale',
                 'party' => $p->sale?->sale_number ?? ('sale #'.$p->sale_id),
                 'method' => $p->method,
-                'amount' => (int) $p->amount,
+                'amount' => (float) $p->amount,
                 'note' => null,
             ]);
     }
@@ -192,7 +192,7 @@ class LogController extends Controller implements HasMiddleware
                 'kind' => 'khaata',
                 'party' => $p->customer?->name ?? ('customer #'.$p->customer_id),
                 'method' => $p->method,
-                'amount' => (int) $p->amount,
+                'amount' => (float) $p->amount,
                 'note' => trim(($p->receipt_number ? $p->receipt_number.' · ' : '').($p->note ?? ''), ' ·'),
             ]);
     }
@@ -212,7 +212,7 @@ class LogController extends Controller implements HasMiddleware
                 'kind' => 'vendor',
                 'party' => $p->vendor?->name ?? ('vendor #'.$p->vendor_id),
                 'method' => $p->method,
-                'amount' => (int) $p->amount,
+                'amount' => (float) $p->amount,
                 'note' => $p->note,
             ]);
     }
@@ -233,7 +233,7 @@ class LogController extends Controller implements HasMiddleware
                 'party' => $p->saleRefund?->sale?->sale_number
                     ?? ('refund #'.$p->sale_refund_id),
                 'method' => $p->method,
-                'amount' => (int) $p->amount,
+                'amount' => (float) $p->amount,
                 'note' => $p->saleRefund?->kind,
             ]);
     }
@@ -252,7 +252,7 @@ class LogController extends Controller implements HasMiddleware
                 'kind' => 'register',
                 'party' => 'Register',
                 'method' => $m->reason,
-                'amount' => (int) $m->amount,
+                'amount' => (float) $m->amount,
                 'note' => $m->note,
             ]);
     }

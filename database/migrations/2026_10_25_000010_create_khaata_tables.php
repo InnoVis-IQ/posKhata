@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('shop_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
-            $table->bigInteger('amount');
+            $table->decimal('amount', 15, 2);
             $table->string('method', 20);
             $table->timestamp('received_at');
             $table->string('receipt_number', 50);
@@ -33,7 +33,7 @@ return new class extends Migration
             $table->foreignId('shop_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
-            $table->bigInteger('amount_delta');
+            $table->decimal('amount_delta', 15, 2);
             $table->string('entry_type', 20);
             $table->string('reference_type', 50)->nullable();
             $table->unsignedBigInteger('reference_id')->nullable();

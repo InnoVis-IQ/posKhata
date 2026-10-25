@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseReceiving;
 use App\Models\PurchaseReceivingLine;
+use App\Support\Money;
 use App\Support\PosContext;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,7 @@ class PurchaseReceiveService
     public function __construct(private readonly StockLedgerService $stock) {}
 
     /**
-     * @param  array<int, array{product_id:int, qty:int|float|string, unit_cost?:int}>  $lines
+     * @param  array<int, array{product_id:int, qty:int|float|string, unit_cost?:float|int}>  $lines
      *         unit_cost defaults to the cost on the invoice line for that product.
      *
      * Received qty per product may not exceed the invoiced qty (across all receivings).
@@ -52,7 +53,7 @@ class PurchaseReceiveService
                 $requested[] = [
                     'product_id' => $pid,
                     'qty' => $qty,
-                    'unit_cost' => isset($line['unit_cost']) ? (int) $line['unit_cost'] : null,
+                    'unit_cost' => isset($line['unit_cost']) ? Money::round($line['unit_cost']) : null,
                 ];
             }
 
@@ -97,7 +98,7 @@ class PurchaseReceiveService
                     throw new \InvalidArgumentException("Product #{$r['product_id']} not found in this shop.");
                 }
 
-                $cost = $r['unit_cost'] ?? (int) $invoiceLines->get($product->id)->first()->unit_cost;
+                $cost = $r['unit_cost'] ?? Money::round((float) $invoiceLines->get($product->id)->first()->unit_cost);
                 if ($cost < 0) {
                     throw new \InvalidArgumentException('unit_cost cannot be negative.');
                 }

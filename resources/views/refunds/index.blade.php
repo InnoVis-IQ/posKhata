@@ -30,7 +30,7 @@
                         <tr class="border-b border-line last:border-0">
                             <td class="px-4 py-3">{{ $item->sale_number }}</td>
                             <td class="px-4 py-3">{{ $item->kind }}</td>
-                            <td class="px-4 py-3">{{ $item->total }}</td>
+                            <td class="px-4 py-3 tabular-nums">{{ \App\Support\Money::format($item->total) }}</td>
                             <td class="px-4 py-3 text-right">
                                 <form method="POST" action="{{ route('refunds.approve', $item->id) }}" class="inline">@csrf<button class="text-accent hover:underline">Approve</button></form>
                                 <form method="POST" action="{{ route('refunds.reject', $item->id) }}" class="ml-3 inline">@csrf<button class="text-danger hover:underline">Reject</button></form>

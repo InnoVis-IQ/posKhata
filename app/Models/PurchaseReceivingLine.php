@@ -18,7 +18,7 @@ class PurchaseReceivingLine extends Model
     {
         return [
             'qty' => 'decimal:3',
-            'unit_cost' => 'integer',
+            'unit_cost' => 'decimal:2',
         ];
     }
 

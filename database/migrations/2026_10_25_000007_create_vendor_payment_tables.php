@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('shop_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->foreignId('vendor_id')->constrained()->cascadeOnDelete();
-            $table->bigInteger('amount');
+            $table->decimal('amount', 15, 2);
             $table->string('method', 20);
             $table->timestamp('paid_at');
             $table->foreignId('register_session_id')->nullable()->constrained()->nullOnDelete();
@@ -34,7 +34,7 @@ return new class extends Migration
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->foreignId('vendor_payment_id')->constrained()->cascadeOnDelete();
             $table->foreignId('purchase_invoice_id')->constrained()->cascadeOnDelete();
-            $table->bigInteger('amount');
+            $table->decimal('amount', 15, 2);
             $table->timestamp('created_at')->nullable();
             $table->softDeletes();
 

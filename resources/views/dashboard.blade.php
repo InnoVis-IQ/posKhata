@@ -4,11 +4,11 @@
 @section('info', 'Quick links plus stock, credit, sales, and valued customers for this branch.')
 
 @php
-    $minor = (int) ($shop->currency_minor_units ?? 2);
-    $money = fn (int $n) => \App\Support\Money::format($n, $minor);
+    $decimals = (int) ($shop->currency_minor_units ?? 2);
+    $money = fn ($n) => \App\Support\Money::format($n, $decimals);
     $isAdmin = in_array($viewer->role, ['admin', 'superadmin'], true);
-    $weekMax = max(1, (int) $weekDailySales->max('amount'));
-    $weekTotal = (int) $weekDailySales->sum('amount');
+    $weekMax = max(0.01, (float) $weekDailySales->max('amount'));
+    $weekTotal = (float) $weekDailySales->sum('amount');
     $fmtQty = fn ($q) => rtrim(rtrim(number_format((float) $q, 3, '.', ''), '0'), '.');
 @endphp
 
@@ -125,7 +125,7 @@
                             </div>
                             <div class="shrink-0 text-right">
                                 <p class="tabular-nums">{{ $fmtQty($row->qty_sold) }} sold</p>
-                                <p class="text-xs tabular-nums text-muted">{{ (int) $row->sale_count }} {{ \Illuminate\Support\Str::plural('sale', (int) $row->sale_count) }} · {{ $money((int) $row->revenue) }}</p>
+                                <p class="text-xs tabular-nums text-muted">{{ (int) $row->sale_count }} {{ \Illuminate\Support\Str::plural('sale', (int) $row->sale_count) }} · {{ $money($row->revenue) }}</p>
                             </div>
                         </li>
                     @endforeach

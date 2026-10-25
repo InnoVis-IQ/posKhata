@@ -20,9 +20,9 @@ return new class extends Migration
             $table->foreignId('requested_by')->constrained('users')->cascadeOnDelete();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
-            $table->bigInteger('subtotal')->default(0);
-            $table->bigInteger('tax_total')->default(0);
-            $table->bigInteger('total')->default(0);
+            $table->decimal('subtotal', 15, 2)->default(0);
+            $table->decimal('tax_total', 15, 2)->default(0);
+            $table->decimal('total', 15, 2)->default(0);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -35,7 +35,7 @@ return new class extends Migration
             $table->foreignId('sale_line_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->decimal('qty', 12, 3);
-            $table->bigInteger('amount')->default(0);
+            $table->decimal('amount', 15, 2)->default(0);
             $table->softDeletes();
         });
 
@@ -45,7 +45,7 @@ return new class extends Migration
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->foreignId('sale_refund_id')->constrained()->cascadeOnDelete();
             $table->string('method', 20);
-            $table->bigInteger('amount');
+            $table->decimal('amount', 15, 2);
             $table->foreignId('register_session_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamp('created_at')->nullable();
             $table->softDeletes();

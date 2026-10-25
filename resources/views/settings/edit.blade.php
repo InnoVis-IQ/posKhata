@@ -55,8 +55,8 @@
                 <p class="mt-1 text-xs text-muted">Basis points: <strong>1500</strong> = 15.00%. Current: {{ number_format(old('tax_rate_bps', $shop->tax_rate_bps) / 100, 2) }}%.</p>
             </div>
             <div>
-                <label class="mb-1 block text-sm font-medium" for="default_khaata_warning_amount">Default khaata warning (minor units)</label>
-                <input id="default_khaata_warning_amount" name="default_khaata_warning_amount" type="number" value="{{ old('default_khaata_warning_amount', $shop->default_khaata_warning_amount) }}" class="w-full rounded-lg border border-line px-3 py-2 text-sm">
+                <label class="mb-1 block text-sm font-medium" for="default_khaata_warning_amount">Default khaata warning (PKR)</label>
+                <input id="default_khaata_warning_amount" name="default_khaata_warning_amount" type="number" step="0.01" min="0" value="{{ old('default_khaata_warning_amount', $shop->default_khaata_warning_amount) }}" class="w-full rounded-lg border border-line px-3 py-2 text-sm">
             </div>
             <div class="flex items-end">
                 <label class="flex items-center gap-2 text-sm">

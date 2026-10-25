@@ -19,10 +19,10 @@ class Sale extends Model
     protected function casts(): array
     {
         return [
-            'subtotal' => 'integer',
-            'discount_total' => 'integer',
-            'tax_total' => 'integer',
-            'total' => 'integer',
+            'subtotal' => 'decimal:2',
+            'discount_total' => 'decimal:2',
+            'tax_total' => 'decimal:2',
+            'total' => 'decimal:2',
             'sold_at' => 'datetime',
         ];
     }

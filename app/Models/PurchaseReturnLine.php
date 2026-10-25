@@ -18,8 +18,8 @@ class PurchaseReturnLine extends Model
     {
         return [
             'qty' => 'decimal:3',
-            'unit_cost' => 'integer',
-            'line_total' => 'integer',
+            'unit_cost' => 'decimal:2',
+            'line_total' => 'decimal:2',
         ];
     }
 

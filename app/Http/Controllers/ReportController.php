@@ -8,6 +8,7 @@ use App\Models\Sale;
 use App\Models\Vendor;
 use App\Models\VendorPaymentAllocation;
 use App\Services\VendorPayablesService;
+use App\Support\Money;
 use App\Support\PosContext;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -51,15 +52,15 @@ class ReportController extends Controller implements HasMiddleware
             ->orderBy('name')
             ->get()
             ->map(function (Vendor $vendor) {
-                $invoiced = (int) PurchaseInvoice::query()->where('vendor_id', $vendor->id)->sum('total');
-                $allocated = (int) VendorPaymentAllocation::query()
+                $invoiced = Money::round(PurchaseInvoice::query()->where('vendor_id', $vendor->id)->sum('total'));
+                $allocated = Money::round(VendorPaymentAllocation::query()
                     ->whereIn('purchase_invoice_id', PurchaseInvoice::query()->where('vendor_id', $vendor->id)->select('id'))
-                    ->sum('amount');
+                    ->sum('amount'));
 
                 return (object) [
                     'id' => $vendor->id,
                     'name' => $vendor->name,
-                    'unpaid' => $invoiced - $allocated,
+                    'unpaid' => Money::round($invoiced - $allocated),
                     'unallocated_credit' => $this->payables->vendorCredit($vendor),
                     'owed' => $this->payables->vendorOwed($vendor),
                 ];

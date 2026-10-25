@@ -14,13 +14,13 @@ return new class extends Migration
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->foreignId('opened_by')->constrained('users')->cascadeOnDelete();
             $table->timestamp('opened_at');
-            $table->bigInteger('opening_float')->default(0);
+            $table->decimal('opening_float', 15, 2)->default(0);
             $table->string('status', 20)->default('open');
             $table->foreignId('closed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('closed_at')->nullable();
-            $table->bigInteger('expected_cash')->nullable();
-            $table->bigInteger('counted_cash')->nullable();
-            $table->bigInteger('variance')->nullable();
+            $table->decimal('expected_cash', 15, 2)->nullable();
+            $table->decimal('counted_cash', 15, 2)->nullable();
+            $table->decimal('variance', 15, 2)->nullable();
             $table->foreignId('reopened_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('reopened_at')->nullable();
             $table->timestamps();
@@ -37,7 +37,7 @@ return new class extends Migration
             $table->foreignId('register_session_id')->constrained()->cascadeOnDelete();
             $table->string('direction', 10);
             $table->string('reason', 30);
-            $table->bigInteger('amount');
+            $table->decimal('amount', 15, 2);
             $table->string('reference_type', 50)->nullable();
             $table->unsignedBigInteger('reference_id')->nullable();
             $table->text('note')->nullable();

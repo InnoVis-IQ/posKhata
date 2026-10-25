@@ -29,7 +29,7 @@
                         <tr class="border-b border-line last:border-0">
                             <td class="px-4 py-3">{{ $sale->sale_number }}</td>
                             <td class="px-4 py-3">{{ $sale->sold_at }}</td>
-                            <td class="px-4 py-3">{{ $sale->total }}</td>
+                            <td class="px-4 py-3 tabular-nums">{{ \App\Support\Money::format($sale->total) }}</td>
                             <td class="px-4 py-3 text-right"><a href="{{ route('sales.receipt', $sale->id) }}" class="text-accent hover:underline">Receipt</a></td>
                         </tr>
                     @endforeach

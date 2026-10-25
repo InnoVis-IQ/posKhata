@@ -16,10 +16,10 @@ return new class extends Migration
             $table->foreignId('register_session_id')->constrained()->cascadeOnDelete();
             $table->string('sale_number', 50);
             $table->string('status', 30)->default('completed');
-            $table->bigInteger('subtotal')->default(0);
-            $table->bigInteger('discount_total')->default(0);
-            $table->bigInteger('tax_total')->default(0);
-            $table->bigInteger('total')->default(0);
+            $table->decimal('subtotal', 15, 2)->default(0);
+            $table->decimal('discount_total', 15, 2)->default(0);
+            $table->decimal('tax_total', 15, 2)->default(0);
+            $table->decimal('total', 15, 2)->default(0);
             $table->timestamp('sold_at');
             $table->foreignId('cashier_id')->constrained('users')->cascadeOnDelete();
             $table->text('notes')->nullable();
@@ -38,11 +38,11 @@ return new class extends Migration
             $table->foreignId('sale_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->decimal('qty', 12, 3);
-            $table->bigInteger('unit_price')->default(0);
-            $table->bigInteger('unit_cost')->default(0);
-            $table->bigInteger('discount_amount')->default(0);
-            $table->bigInteger('tax_amount')->default(0);
-            $table->bigInteger('line_total')->default(0);
+            $table->decimal('unit_price', 15, 2)->default(0);
+            $table->decimal('unit_cost', 15, 2)->default(0);
+            $table->decimal('discount_amount', 15, 2)->default(0);
+            $table->decimal('tax_amount', 15, 2)->default(0);
+            $table->decimal('line_total', 15, 2)->default(0);
             $table->softDeletes();
         });
 
@@ -52,7 +52,7 @@ return new class extends Migration
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->foreignId('sale_id')->constrained()->cascadeOnDelete();
             $table->string('method', 20);
-            $table->bigInteger('amount');
+            $table->decimal('amount', 15, 2);
             $table->timestamp('created_at')->nullable();
             $table->softDeletes();
         });

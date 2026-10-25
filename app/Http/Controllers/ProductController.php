@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\GatesRoles;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Unit;
+use App\Support\Money;
 use App\Support\PosContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -123,17 +124,17 @@ class ProductController extends Controller implements HasMiddleware
             'barcode' => ['nullable', 'string', 'max:100', Rule::unique('products', 'barcode')->where('shop_id', $shopId)->ignore($product?->id)],
             'unit_id' => ['required', 'integer', Rule::exists('units', 'id')->where('shop_id', $shopId)],
             'category_id' => ['nullable', 'integer', Rule::exists('categories', 'id')->where('shop_id', $shopId)],
-            'unit_cost' => ['nullable', 'integer', 'min:0'],
-            'unit_sale_price' => ['required', 'integer', 'min:0'],
-            'tax' => ['nullable', 'integer', 'min:0'],
-            'unit_discount' => ['nullable', 'integer', 'min:0'],
+            'unit_cost' => ['nullable', 'numeric', 'min:0'],
+            'unit_sale_price' => ['required', 'numeric', 'min:0'],
+            'tax' => ['nullable', 'numeric', 'min:0'],
+            'unit_discount' => ['nullable', 'numeric', 'min:0'],
             'reorder_level' => ['nullable', 'numeric', 'min:0'],
             'batch_size' => ['nullable', 'numeric', 'min:0'],
-            'batch_discount' => ['nullable', 'integer', 'min:0'],
+            'batch_discount' => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $price = (int) $data['unit_sale_price'];
-        $discount = (int) ($data['unit_discount'] ?? 0);
+        $price = Money::round($data['unit_sale_price']);
+        $discount = Money::round($data['unit_discount'] ?? 0);
 
         if ($discount > $price) {
             throw ValidationException::withMessages(['unit_discount' => 'Unit discount cannot exceed the unit sale price.']);
@@ -142,15 +143,15 @@ class ProductController extends Controller implements HasMiddleware
         // Unit price is tax-inclusive: when tax is blank, default to the tax portion of the shop rate.
         $bps = (int) $shop->tax_rate_bps;
         $tax = isset($data['tax'])
-            ? (int) $data['tax']
-            : ($bps > 0 ? (int) round($price * $bps / (10000 + $bps)) : 0);
+            ? Money::round($data['tax'])
+            : ($bps > 0 ? Money::round($price * $bps / (10000 + $bps)) : 0.0);
 
         if ($tax > $price) {
             throw ValidationException::withMessages(['tax' => 'Tax cannot exceed the unit sale price.']);
         }
 
         $batchSize = round((float) ($data['batch_size'] ?? 0), 3);
-        $batchDiscount = $batchSize > 0 ? (int) ($data['batch_discount'] ?? 0) : 0;
+        $batchDiscount = $batchSize > 0 ? Money::round($data['batch_discount'] ?? 0) : 0.0;
 
         return [
             'name' => $data['name'],
@@ -158,11 +159,11 @@ class ProductController extends Controller implements HasMiddleware
             'barcode' => $data['barcode'] ?? null,
             'unit_id' => (int) $data['unit_id'],
             'category_id' => $data['category_id'] ?? null,
-            'unit_cost' => (int) ($data['unit_cost'] ?? 0),
+            'unit_cost' => Money::round($data['unit_cost'] ?? 0),
             'unit_sale_price' => $price,
             'tax' => $tax,
             'unit_discount' => $discount,
-            'final_unit_price' => $price - $discount,
+            'final_unit_price' => Money::round($price - $discount),
             'reorder_level' => number_format((float) ($data['reorder_level'] ?? 0), 3, '.', ''),
             'batch_size' => number_format($batchSize, 3, '.', ''),
             'batch_discount' => $batchDiscount,

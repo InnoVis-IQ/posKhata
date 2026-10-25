@@ -8,13 +8,13 @@
         $p = $product;
         $taxBps = (int) $shop->tax_rate_bps;
         $taxPercent = number_format($taxBps / 100, 2);
-        $initialSale = (int) old('unit_sale_price', $p->unit_sale_price ?? 0);
+        $initialSale = (float) old('unit_sale_price', $p->unit_sale_price ?? 0);
         $suggestedTax = $taxBps > 0 && $initialSale > 0
-            ? (int) round($initialSale * $taxBps / (10000 + $taxBps))
-            : 0;
+            ? round($initialSale * $taxBps / (10000 + $taxBps), 2)
+            : 0.0;
         $initialTax = old('tax', $p->tax ?? null);
-        $initialTax = $initialTax !== null && $initialTax !== '' ? (int) $initialTax : $suggestedTax;
-        $taxWasCustom = $product && (int) ($p->tax ?? 0) !== $suggestedTax && $initialSale > 0;
+        $initialTax = $initialTax !== null && $initialTax !== '' ? (float) $initialTax : $suggestedTax;
+        $taxWasCustom = $product && round((float) ($p->tax ?? 0), 2) !== round($suggestedTax, 2) && $initialSale > 0;
     @endphp
     <form
         method="POST"
@@ -23,18 +23,21 @@
         x-data="{
             taxRateBps: {{ $taxBps }},
             unitSalePrice: {{ $initialSale }},
-            unitDiscount: {{ (int) old('unit_discount', $p->unit_discount ?? 0) }},
+            unitDiscount: {{ (float) old('unit_discount', $p->unit_discount ?? 0) }},
             tax: {{ $initialTax }},
             taxManual: {{ ($taxWasCustom || old('tax') !== null) ? 'true' : 'false' }},
             batchSize: {{ (float) old('batch_size', $p->batch_size ?? 0) }},
+            roundMoney(n) {
+                return Math.round((Number(n) || 0) * 100) / 100;
+            },
             get finalUnitPrice() {
-                return Math.max(0, (Number(this.unitSalePrice) || 0) - (Number(this.unitDiscount) || 0));
+                return this.roundMoney(Math.max(0, (Number(this.unitSalePrice) || 0) - (Number(this.unitDiscount) || 0)));
             },
             suggestedTax() {
                 const bps = Number(this.taxRateBps) || 0;
                 const price = Number(this.unitSalePrice) || 0;
                 if (!bps || !price) return 0;
-                return Math.round(price * bps / (10000 + bps));
+                return this.roundMoney(price * bps / (10000 + bps));
             },
             onSalePriceInput() {
                 if (!this.taxManual) {
@@ -91,13 +94,13 @@
                 <p class="flex items-center gap-1.5 text-sm font-semibold">
                     Pricing
                     <x-info>Cost, selling price, tax, and discount. Final price is what the customer pays per unit.</x-info>
-                    <span class="font-normal text-muted">(amounts in minor currency units)</span>
+                    <span class="font-normal text-muted">(PKR)</span>
                 </p>
             </div>
 
             <div>
                 <label class="mb-1 block text-sm font-medium" for="unit_cost">Unit cost</label>
-                <input id="unit_cost" name="unit_cost" type="number" min="0" value="{{ old('unit_cost', $p->unit_cost ?? 0) }}" class="w-full rounded-lg border border-line px-3 py-2 text-sm">
+                <input id="unit_cost" name="unit_cost" type="number" min="0" step="0.01" value="{{ old('unit_cost', $p->unit_cost ?? 0) }}" class="w-full rounded-lg border border-line px-3 py-2 text-sm">
             </div>
             <div>
                 <label class="mb-1 block text-sm font-medium" for="unit_sale_price">Unit sale price</label>
@@ -106,6 +109,7 @@
                     name="unit_sale_price"
                     type="number"
                     min="0"
+                    step="0.01"
                     x-model.number="unitSalePrice"
                     @input="onSalePriceInput()"
                     class="w-full rounded-lg border border-line px-3 py-2 text-sm"
@@ -119,6 +123,7 @@
                     name="tax"
                     type="number"
                     min="0"
+                    step="0.01"
                     x-model.number="tax"
                     @input="onTaxInput()"
                     class="w-full rounded-lg border border-line px-3 py-2 text-sm"
@@ -130,11 +135,11 @@
             </div>
             <div>
                 <label class="mb-1 block text-sm font-medium" for="unit_discount">Unit discount</label>
-                <input id="unit_discount" name="unit_discount" type="number" min="0" x-model.number="unitDiscount" class="w-full rounded-lg border border-line px-3 py-2 text-sm">
+                <input id="unit_discount" name="unit_discount" type="number" min="0" step="0.01" x-model.number="unitDiscount" class="w-full rounded-lg border border-line px-3 py-2 text-sm">
             </div>
             <div>
                 <label class="mb-1 block text-sm font-medium" for="final_unit_price">Final unit price</label>
-                <input id="final_unit_price" name="final_unit_price" type="number" min="0" :value="finalUnitPrice" readonly class="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm">
+                <input id="final_unit_price" name="final_unit_price" type="number" min="0" step="0.01" :value="finalUnitPrice" readonly class="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm">
                 <p class="mt-1 text-xs text-muted">Unit sale price − unit discount.</p>
             </div>
             <div>
@@ -154,7 +159,7 @@
             </div>
             <div>
                 <label class="mb-1 block text-sm font-medium" for="batch_discount">Batch discount</label>
-                <input id="batch_discount" name="batch_discount" type="number" min="0" value="{{ old('batch_discount', $p->batch_discount ?? 0) }}" class="w-full rounded-lg border border-line px-3 py-2 text-sm" :disabled="!batchSize || batchSize <= 0">
+                <input id="batch_discount" name="batch_discount" type="number" min="0" step="0.01" value="{{ old('batch_discount', $p->batch_discount ?? 0) }}" class="w-full rounded-lg border border-line px-3 py-2 text-sm" :disabled="!batchSize || batchSize <= 0">
             </div>
         </div>
         <label class="flex items-center gap-2 text-sm">

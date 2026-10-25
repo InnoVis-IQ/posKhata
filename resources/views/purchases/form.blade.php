@@ -35,7 +35,7 @@
                 <div class="grid gap-2 md:grid-cols-3">
                     <input type="number" :name="`lines[${index}][product_id]`" x-model="line.product_id" placeholder="Product ID" class="rounded-lg border border-line px-3 py-2 text-sm" required>
                     <input type="number" step="0.001" :name="`lines[${index}][qty]`" x-model="line.qty" placeholder="Qty" class="rounded-lg border border-line px-3 py-2 text-sm" required>
-                    <input type="number" :name="`lines[${index}][unit_cost]`" x-model="line.unit_cost" placeholder="Unit cost (minor)" class="rounded-lg border border-line px-3 py-2 text-sm" required>
+                    <input type="number" step="0.01" min="0" :name="`lines[${index}][unit_cost]`" x-model="line.unit_cost" placeholder="Unit cost (PKR)" class="rounded-lg border border-line px-3 py-2 text-sm" required>
                 </div>
             </template>
             <button type="button" class="text-sm text-accent" @click="lines.push({ product_id: '', qty: '', unit_cost: '' })">+ Add line</button>

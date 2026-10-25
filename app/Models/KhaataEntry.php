@@ -22,7 +22,7 @@ class KhaataEntry extends Model
     protected function casts(): array
     {
         return [
-            'amount_delta' => 'integer',
+            'amount_delta' => 'decimal:2',
             'reference_id' => 'integer',
             'created_at' => 'datetime',
         ];

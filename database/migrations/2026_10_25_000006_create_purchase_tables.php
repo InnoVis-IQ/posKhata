@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string('invoice_number', 100);
             $table->date('invoice_date');
             $table->date('due_date')->nullable();
-            $table->bigInteger('subtotal')->default(0);
-            $table->bigInteger('tax_total')->default(0);
-            $table->bigInteger('total')->default(0);
+            $table->decimal('subtotal', 15, 2)->default(0);
+            $table->decimal('tax_total', 15, 2)->default(0);
+            $table->decimal('total', 15, 2)->default(0);
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
@@ -36,9 +36,9 @@ return new class extends Migration
             $table->foreignId('purchase_invoice_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->decimal('qty', 12, 3);
-            $table->bigInteger('unit_cost')->default(0);
-            $table->bigInteger('tax_amount')->default(0);
-            $table->bigInteger('line_total')->default(0);
+            $table->decimal('unit_cost', 15, 2)->default(0);
+            $table->decimal('tax_amount', 15, 2)->default(0);
+            $table->decimal('line_total', 15, 2)->default(0);
 
             $table->softDeletes();
             $table->index('purchase_invoice_id');
@@ -64,7 +64,7 @@ return new class extends Migration
             $table->foreignId('purchase_receiving_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->decimal('qty', 12, 3);
-            $table->bigInteger('unit_cost')->default(0);
+            $table->decimal('unit_cost', 15, 2)->default(0);
             $table->softDeletes();
         });
 
@@ -75,9 +75,9 @@ return new class extends Migration
             $table->foreignId('vendor_id')->constrained()->cascadeOnDelete();
             $table->foreignId('purchase_invoice_id')->nullable()->constrained()->nullOnDelete();
             $table->date('return_date');
-            $table->bigInteger('subtotal')->default(0);
-            $table->bigInteger('tax_total')->default(0);
-            $table->bigInteger('total')->default(0);
+            $table->decimal('subtotal', 15, 2)->default(0);
+            $table->decimal('tax_total', 15, 2)->default(0);
+            $table->decimal('total', 15, 2)->default(0);
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->text('notes')->nullable();
             $table->timestamp('created_at')->nullable();
@@ -91,8 +91,8 @@ return new class extends Migration
             $table->foreignId('purchase_return_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->decimal('qty', 12, 3);
-            $table->bigInteger('unit_cost')->default(0);
-            $table->bigInteger('line_total')->default(0);
+            $table->decimal('unit_cost', 15, 2)->default(0);
+            $table->decimal('line_total', 15, 2)->default(0);
             $table->softDeletes();
         });
     }

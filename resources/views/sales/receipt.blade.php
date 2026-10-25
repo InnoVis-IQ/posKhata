@@ -16,17 +16,17 @@
             @forelse ($sale->lines as $line)
                 <div class="mb-2 flex justify-between gap-2">
                     <span>{{ $line->name }} × {{ $line->qty }}</span>
-                    <span>{{ $line->line_total }}</span>
+                    <span class="tabular-nums">{{ \App\Support\Money::format($line->line_total) }}</span>
                 </div>
             @empty
                 <p class="text-muted">No lines (stub receipt).</p>
             @endforelse
         </div>
         <div class="space-y-1 border-t border-line pt-3 text-sm">
-            <div class="flex justify-between"><span>Subtotal</span><span>{{ $sale->subtotal }}</span></div>
-            <div class="flex justify-between"><span>Discount</span><span>{{ $sale->discount_total }}</span></div>
-            <div class="flex justify-between"><span>Tax</span><span>{{ $sale->tax_total }}</span></div>
-            <div class="flex justify-between font-semibold"><span>Total</span><span>{{ $sale->total }}</span></div>
+            <div class="flex justify-between"><span>Subtotal</span><span class="tabular-nums">{{ \App\Support\Money::format($sale->subtotal) }}</span></div>
+            <div class="flex justify-between"><span>Discount</span><span class="tabular-nums">{{ \App\Support\Money::format($sale->discount_total) }}</span></div>
+            <div class="flex justify-between"><span>Tax</span><span class="tabular-nums">{{ \App\Support\Money::format($sale->tax_total) }}</span></div>
+            <div class="flex justify-between font-semibold"><span>Total</span><span class="tabular-nums">{{ \App\Support\Money::format($sale->total) }}</span></div>
         </div>
         @if ($shop->receipt_footer)
             <p class="mt-4 whitespace-pre-line text-center text-xs text-muted">{{ $shop->receipt_footer }}</p>

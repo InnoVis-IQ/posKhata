@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\GatesRoles;
 use App\Models\Customer;
 use App\Models\KhaataEntry;
 use App\Services\KhaataPaymentService;
+use App\Support\Money;
 use App\Support\PosContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -84,7 +85,7 @@ class CustomerController extends Controller
         $model = $this->find($customer);
 
         $data = $request->validate([
-            'amount' => ['required', 'integer', 'min:1'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
             'method' => ['required', Rule::in(['cash', 'card', 'bank', 'other'])],
             'receipt_number' => [
                 'nullable', 'string', 'max:50',
@@ -97,7 +98,7 @@ class CustomerController extends Controller
         try {
             $payment = $this->khaata->record(
                 $model,
-                (int) $data['amount'],
+                Money::round($data['amount']),
                 $data['method'],
                 $data['receipt_number'] ?? null,
                 $data['received_at'] ?? null,
@@ -123,10 +124,10 @@ class CustomerController extends Controller
         return Customer::query()->where('shop_id', PosContext::shopId())->findOrFail($id);
     }
 
-    /** Per-customer override, else the shop default (minor units; 0 = no warning). */
-    private function threshold(Customer $customer): int
+    /** Per-customer override, else the shop default (PKR; 0 = no warning). */
+    private function threshold(Customer $customer): float
     {
-        return (int) ($customer->khaata_warning_amount ?? PosContext::shop()->default_khaata_warning_amount ?? 0);
+        return Money::round($customer->khaata_warning_amount ?? PosContext::shop()->default_khaata_warning_amount ?? 0);
     }
 
     private function validated(Request $request, ?Customer $customer = null): array
@@ -139,8 +140,12 @@ class CustomerController extends Controller
             ],
             'email' => ['nullable', 'email', 'max:255'],
             'address' => ['nullable', 'string', 'max:2000'],
-            'khaata_warning_amount' => ['nullable', 'integer', 'min:0'],
+            'khaata_warning_amount' => ['nullable', 'numeric', 'min:0'],
         ]);
+
+        if (array_key_exists('khaata_warning_amount', $data) && $data['khaata_warning_amount'] !== null) {
+            $data['khaata_warning_amount'] = Money::round($data['khaata_warning_amount']);
+        }
 
         $data['is_active'] = $request->boolean('is_active');
 

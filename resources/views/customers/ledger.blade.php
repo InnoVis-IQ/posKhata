@@ -13,7 +13,7 @@
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
             <p class="text-sm text-muted">Balance (derived)</p>
-            <p class="text-2xl font-semibold">{{ $customer->balance }}</p>
+            <p class="text-2xl font-semibold tabular-nums">{{ \App\Support\Money::format($customer->balance) }}</p>
         </div>
         <a href="{{ route('customers.payment', $customer->id) }}" class="rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-accent-hover">Record payment</a>
     </div>
@@ -36,7 +36,7 @@
                         <tr class="border-b border-line last:border-0">
                             <td class="px-4 py-3">{{ $entry->created_at }}</td>
                             <td class="px-4 py-3">{{ $entry->entry_type }}</td>
-                            <td class="px-4 py-3">{{ $entry->amount_delta }}</td>
+                            <td class="px-4 py-3 tabular-nums">{{ \App\Support\Money::format($entry->amount_delta) }}</td>
                             <td class="px-4 py-3">{{ $entry->note }}</td>
                         </tr>
                     @endforeach

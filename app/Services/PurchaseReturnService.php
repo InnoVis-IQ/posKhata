@@ -7,6 +7,7 @@ use App\Models\PurchaseInvoice;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnLine;
 use App\Models\Vendor;
+use App\Support\Money;
 use App\Support\PosContext;
 use Illuminate\Support\Facades\DB;
 
@@ -23,7 +24,7 @@ class PurchaseReturnService
      *   purchase_invoice_id?: ?int,
      *   return_date?: mixed,
      *   notes?: ?string,
-     *   lines: array<int, array{product_id:int, qty:int|float|string, unit_cost?:int}>
+     *   lines: array<int, array{product_id:int, qty:int|float|string, unit_cost?:float|int}>
      * }  $data  vendor_id is optional when purchase_invoice_id is given. Stock leaves the invoice's
      *           branch (or the current branch when there is no invoice). unit_cost defaults to the
      *           invoice line cost (or product.unit_cost). line_total = qty * unit_cost (ex-tax);
@@ -94,7 +95,7 @@ class PurchaseReturnService
             }
 
             $computed = [];
-            $subtotal = $taxTotal = 0;
+            $subtotal = $taxTotal = 0.0;
             foreach ($lines as $i => $line) {
                 $product = $products->get((int) ($line['product_id'] ?? 0));
                 if ($product === null) {
@@ -107,21 +108,21 @@ class PurchaseReturnService
 
                 $invLine = $invoiceLines->get($product->id)?->first();
                 $unitCost = isset($line['unit_cost'])
-                    ? (int) $line['unit_cost']
-                    : (int) ($invLine?->unit_cost ?? $product->unit_cost);
+                    ? Money::round($line['unit_cost'])
+                    : Money::round((float) ($invLine?->unit_cost ?? $product->unit_cost));
                 if ($unitCost < 0) {
                     throw new \InvalidArgumentException('unit_cost cannot be negative.');
                 }
 
-                $lineTotal = (int) round($qty * $unitCost);
-                $tax = 0;
+                $lineTotal = Money::round($qty * $unitCost);
+                $tax = 0.0;
                 if ($invLine !== null && (float) $invLine->qty > 0) {
-                    $tax = (int) round((int) $invLine->tax_amount * ($qty / (float) $invLine->qty));
+                    $tax = Money::round((float) $invLine->tax_amount * ($qty / (float) $invLine->qty));
                 }
 
                 $computed[] = compact('product', 'qty', 'unitCost', 'lineTotal');
-                $subtotal += $lineTotal;
-                $taxTotal += $tax;
+                $subtotal = Money::round($subtotal + $lineTotal);
+                $taxTotal = Money::round($taxTotal + $tax);
             }
 
             $return = PurchaseReturn::create([
@@ -132,7 +133,7 @@ class PurchaseReturnService
                 'return_date' => $data['return_date'] ?? now()->toDateString(),
                 'subtotal' => $subtotal,
                 'tax_total' => $taxTotal,
-                'total' => $subtotal + $taxTotal,
+                'total' => Money::round($subtotal + $taxTotal),
                 'created_by' => $user->id,
                 'notes' => $data['notes'] ?? null,
             ]);

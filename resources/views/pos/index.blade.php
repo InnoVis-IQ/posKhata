@@ -10,9 +10,9 @@
             'sku' => $p->sku,
             'barcode' => $p->barcode,
             'unit' => $p->unit ?? 'pcs',
-            'price' => (int) ($p->final_unit_price ?? 0),
+            'price' => (float) ($p->final_unit_price ?? 0),
             'batch_size' => (float) ($p->batch_size ?? 0),
-            'batch_discount' => (int) ($p->batch_discount ?? 0),
+            'batch_discount' => (float) ($p->batch_discount ?? 0),
         ])->values();
     @endphp
 
@@ -75,8 +75,8 @@
 
                 <div class="grid grid-cols-2 gap-2 text-sm">
                     <label class="col-span-2">
-                        <span class="mb-1 block text-muted">Discount (minor)</span>
-                        <input type="number" name="discount_total" x-model.number="discount" class="w-full rounded-lg border border-line px-3 py-2">
+                        <span class="mb-1 block text-muted">Discount (PKR)</span>
+                        <input type="number" name="discount_total" step="0.01" min="0" x-model.number="discount" class="w-full rounded-lg border border-line px-3 py-2">
                     </label>
                     <p>Subtotal <span class="float-right font-medium" x-text="formatMoney(subtotal)"></span></p>
                     <p>Tax included <span class="float-right font-medium" x-text="formatMoney(tax)"></span></p>
@@ -90,13 +90,13 @@
                 <div class="space-y-2 border-t border-line pt-3 text-sm">
                     <p class="font-medium">Tender</p>
                     <label class="flex items-center justify-between gap-2">Cash
-                        <input type="number" name="payments[cash]" x-model.number="pay.cash" class="w-28 rounded-lg border border-line px-2 py-1">
+                        <input type="number" step="0.01" min="0" name="payments[cash]" x-model.number="pay.cash" class="w-28 rounded-lg border border-line px-2 py-1">
                     </label>
                     <label class="flex items-center justify-between gap-2">Card
-                        <input type="number" name="payments[card]" x-model.number="pay.card" class="w-28 rounded-lg border border-line px-2 py-1">
+                        <input type="number" step="0.01" min="0" name="payments[card]" x-model.number="pay.card" class="w-28 rounded-lg border border-line px-2 py-1">
                     </label>
                     <label class="flex items-center justify-between gap-2">Khaata
-                        <input type="number" name="payments[khaata]" x-model.number="pay.khaata" class="w-28 rounded-lg border border-line px-2 py-1">
+                        <input type="number" step="0.01" min="0" name="payments[khaata]" x-model.number="pay.khaata" class="w-28 rounded-lg border border-line px-2 py-1">
                     </label>
                     <p class="text-xs" :class="tenderOk ? 'text-accent' : 'text-danger'" x-text="tenderOk ? 'Tender matches total' : 'Tender must equal total'"></p>
                 </div>
@@ -115,7 +115,7 @@
                     </div>
                     <div>
                         <label class="mb-1 block text-muted">Khaata pay-down (optional)</label>
-                        <input type="number" name="khaata_payment_amount" value="0" class="w-full rounded-lg border border-line px-3 py-2" placeholder="Amount toward prior balance">
+                        <input type="number" step="0.01" min="0" name="khaata_payment_amount" value="0" class="w-full rounded-lg border border-line px-3 py-2" placeholder="Amount toward prior balance">
                     </div>
                 </div>
 
@@ -184,29 +184,33 @@
                     if (size <= 0) return 0;
                     return Math.floor(line.qty / size) * (Number(line.batch_discount) || 0);
                 },
+                roundMoney(n) {
+                    return Math.round((Number(n) || 0) * 100) / 100;
+                },
                 lineTotal(line) {
-                    return Math.max(0, line.price * line.qty - this.batchOff(line));
+                    return this.roundMoney(Math.max(0, line.price * line.qty - this.batchOff(line)));
                 },
                 get subtotal() {
-                    return this.cart.reduce((s, l) => s + this.lineTotal(l), 0);
+                    return this.roundMoney(this.cart.reduce((s, l) => s + this.lineTotal(l), 0));
                 },
                 get taxable() {
-                    return Math.max(0, this.subtotal - (this.discount || 0));
+                    return this.roundMoney(Math.max(0, this.subtotal - (this.discount || 0)));
                 },
                 get tax() {
                     // Prices are tax-inclusive; extract embedded tax using shop tax_rate_bps.
                     const bps = Number(this.taxRateBps) || 0;
                     if (!bps) return 0;
-                    return Math.round(this.taxable * bps / (10000 + bps));
+                    return this.roundMoney(this.taxable * bps / (10000 + bps));
                 },
                 get total() {
                     return this.taxable;
                 },
                 get tenderOk() {
-                    return (this.pay.cash || 0) + (this.pay.card || 0) + (this.pay.khaata || 0) === this.total && this.total > 0;
+                    const tender = this.roundMoney((this.pay.cash || 0) + (this.pay.card || 0) + (this.pay.khaata || 0));
+                    return tender === this.total && this.total > 0;
                 },
-                formatMoney(minor) {
-                    return (Number(minor || 0) / 100).toFixed(2);
+                formatMoney(amount) {
+                    return this.roundMoney(amount).toFixed(2);
                 },
                 add(product) {
                     const existing = this.cart.find(l => l.id === product.id);

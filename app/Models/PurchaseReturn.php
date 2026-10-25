@@ -22,9 +22,9 @@ class PurchaseReturn extends Model
     {
         return [
             'return_date' => 'date',
-            'subtotal' => 'integer',
-            'tax_total' => 'integer',
-            'total' => 'integer',
+            'subtotal' => 'decimal:2',
+            'tax_total' => 'decimal:2',
+            'total' => 'decimal:2',
             'created_at' => 'datetime',
         ];
     }

@@ -16,7 +16,7 @@ class Customer extends Model
     protected function casts(): array
     {
         return [
-            'khaata_warning_amount' => 'integer',
+            'khaata_warning_amount' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }

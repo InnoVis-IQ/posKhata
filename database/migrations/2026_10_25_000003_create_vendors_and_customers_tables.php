@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('phone', 50)->nullable();
             $table->string('email')->nullable();
             $table->text('address')->nullable();
-            $table->bigInteger('khaata_warning_amount')->nullable();
+            $table->decimal('khaata_warning_amount', 15, 2)->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();

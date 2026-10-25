@@ -119,36 +119,36 @@ class DummyDataSeeder extends Seeder
     private function seedProducts(Collection $categories): Collection
     {
         $catalog = [
-            ['name' => 'Fine Atta 10kg', 'unit' => 'pcs', 'cost' => 185000, 'sale' => 210000, 'category' => 'Grocery'],
-            ['name' => 'Sugar 1kg', 'unit' => 'kg', 'cost' => 16000, 'sale' => 18500, 'category' => 'Grocery'],
-            ['name' => 'Basmati Rice 5kg', 'unit' => 'pcs', 'cost' => 95000, 'sale' => 115000, 'category' => 'Grocery'],
-            ['name' => 'Dal Mash 1kg', 'unit' => 'kg', 'cost' => 42000, 'sale' => 48000, 'category' => 'Grocery'],
-            ['name' => 'Cooking Oil 1L', 'unit' => 'l', 'cost' => 52000, 'sale' => 58000, 'category' => 'Grocery'],
-            ['name' => 'Olper Milk 1L', 'unit' => 'l', 'cost' => 32000, 'sale' => 36000, 'category' => 'Dairy'],
-            ['name' => 'Nestle Yogurt 400g', 'unit' => 'pcs', 'cost' => 18000, 'sale' => 22000, 'category' => 'Dairy'],
-            ['name' => 'Eggs (dozen)', 'unit' => 'dozen', 'cost' => 35000, 'sale' => 42000, 'category' => 'Dairy'],
-            ['name' => 'Butter 200g', 'unit' => 'pcs', 'cost' => 28000, 'sale' => 34000, 'category' => 'Dairy'],
-            ['name' => 'Tapal Danedar 950g', 'unit' => 'pcs', 'cost' => 110000, 'sale' => 125000, 'category' => 'Beverages'],
-            ['name' => 'Nescafe Classic 50g', 'unit' => 'pcs', 'cost' => 55000, 'sale' => 65000, 'category' => 'Beverages'],
-            ['name' => 'Rooh Afza 800ml', 'unit' => 'pcs', 'cost' => 45000, 'sale' => 52000, 'category' => 'Beverages'],
-            ['name' => 'Coke 1.5L', 'unit' => 'pcs', 'cost' => 18000, 'sale' => 22000, 'category' => 'Beverages'],
-            ['name' => 'Lays Classic 70g', 'unit' => 'pcs', 'cost' => 7000, 'sale' => 10000, 'category' => 'Snacks'],
-            ['name' => 'Kurkure Masala 70g', 'unit' => 'pcs', 'cost' => 6500, 'sale' => 10000, 'category' => 'Snacks'],
-            ['name' => 'Sooper Biscuits Pack', 'unit' => 'pack', 'cost' => 12000, 'sale' => 15000, 'category' => 'Snacks'],
-            ['name' => 'Surf Excel 1kg', 'unit' => 'pcs', 'cost' => 48000, 'sale' => 56000, 'category' => 'Household'],
-            ['name' => 'Vim Dishwash 500ml', 'unit' => 'pcs', 'cost' => 22000, 'sale' => 28000, 'category' => 'Household'],
-            ['name' => 'Tissue Box', 'unit' => 'pcs', 'cost' => 15000, 'sale' => 20000, 'category' => 'Household'],
-            ['name' => 'Lifebuoy Soap', 'unit' => 'pcs', 'cost' => 9000, 'sale' => 12000, 'category' => 'Personal Care'],
-            ['name' => 'Colgate Toothpaste 100g', 'unit' => 'pcs', 'cost' => 22000, 'sale' => 28000, 'category' => 'Personal Care'],
-            ['name' => 'Shampoo Sachet Pack', 'unit' => 'pack', 'cost' => 8000, 'sale' => 12000, 'category' => 'Personal Care'],
-            ['name' => 'Red Chilli Powder 200g', 'unit' => 'pcs', 'cost' => 18000, 'sale' => 24000, 'category' => 'Spices'],
-            ['name' => 'Haldi Powder 200g', 'unit' => 'pcs', 'cost' => 14000, 'sale' => 18000, 'category' => 'Spices'],
-            ['name' => 'Garam Masala 100g', 'unit' => 'pcs', 'cost' => 16000, 'sale' => 22000, 'category' => 'Spices'],
-            ['name' => 'Bread Large', 'unit' => 'pcs', 'cost' => 14000, 'sale' => 18000, 'category' => 'Bakery'],
-            ['name' => 'Rusk Pack', 'unit' => 'pack', 'cost' => 20000, 'sale' => 26000, 'category' => 'Bakery'],
-            ['name' => 'Frozen Paratha Pack', 'unit' => 'pack', 'cost' => 35000, 'sale' => 42000, 'category' => 'Frozen'],
-            ['name' => 'Notebook A4', 'unit' => 'pcs', 'cost' => 12000, 'sale' => 18000, 'category' => 'Stationery'],
-            ['name' => 'Ballpoint Pen Pack', 'unit' => 'pack', 'cost' => 8000, 'sale' => 12000, 'category' => 'Stationery'],
+            ['name' => 'Fine Atta 10kg', 'unit' => 'pcs', 'cost' => 1850.00, 'sale' => 2100.00, 'category' => 'Grocery'],
+            ['name' => 'Sugar 1kg', 'unit' => 'kg', 'cost' => 160.00, 'sale' => 185.00, 'category' => 'Grocery'],
+            ['name' => 'Basmati Rice 5kg', 'unit' => 'pcs', 'cost' => 950.00, 'sale' => 1150.00, 'category' => 'Grocery'],
+            ['name' => 'Dal Mash 1kg', 'unit' => 'kg', 'cost' => 420.00, 'sale' => 480.00, 'category' => 'Grocery'],
+            ['name' => 'Cooking Oil 1L', 'unit' => 'l', 'cost' => 520.00, 'sale' => 580.00, 'category' => 'Grocery'],
+            ['name' => 'Olper Milk 1L', 'unit' => 'l', 'cost' => 320.00, 'sale' => 360.00, 'category' => 'Dairy'],
+            ['name' => 'Nestle Yogurt 400g', 'unit' => 'pcs', 'cost' => 180.00, 'sale' => 220.00, 'category' => 'Dairy'],
+            ['name' => 'Eggs (dozen)', 'unit' => 'dozen', 'cost' => 350.00, 'sale' => 420.00, 'category' => 'Dairy'],
+            ['name' => 'Butter 200g', 'unit' => 'pcs', 'cost' => 280.00, 'sale' => 340.00, 'category' => 'Dairy'],
+            ['name' => 'Tapal Danedar 950g', 'unit' => 'pcs', 'cost' => 1100.00, 'sale' => 1250.00, 'category' => 'Beverages'],
+            ['name' => 'Nescafe Classic 50g', 'unit' => 'pcs', 'cost' => 550.00, 'sale' => 650.00, 'category' => 'Beverages'],
+            ['name' => 'Rooh Afza 800ml', 'unit' => 'pcs', 'cost' => 450.00, 'sale' => 520.00, 'category' => 'Beverages'],
+            ['name' => 'Coke 1.5L', 'unit' => 'pcs', 'cost' => 180.00, 'sale' => 220.00, 'category' => 'Beverages'],
+            ['name' => 'Lays Classic 70g', 'unit' => 'pcs', 'cost' => 70.00, 'sale' => 100.00, 'category' => 'Snacks'],
+            ['name' => 'Kurkure Masala 70g', 'unit' => 'pcs', 'cost' => 65.00, 'sale' => 100.00, 'category' => 'Snacks'],
+            ['name' => 'Sooper Biscuits Pack', 'unit' => 'pack', 'cost' => 120.00, 'sale' => 150.00, 'category' => 'Snacks'],
+            ['name' => 'Surf Excel 1kg', 'unit' => 'pcs', 'cost' => 480.00, 'sale' => 560.00, 'category' => 'Household'],
+            ['name' => 'Vim Dishwash 500ml', 'unit' => 'pcs', 'cost' => 220.00, 'sale' => 280.00, 'category' => 'Household'],
+            ['name' => 'Tissue Box', 'unit' => 'pcs', 'cost' => 150.00, 'sale' => 200.00, 'category' => 'Household'],
+            ['name' => 'Lifebuoy Soap', 'unit' => 'pcs', 'cost' => 90.00, 'sale' => 120.00, 'category' => 'Personal Care'],
+            ['name' => 'Colgate Toothpaste 100g', 'unit' => 'pcs', 'cost' => 220.00, 'sale' => 280.00, 'category' => 'Personal Care'],
+            ['name' => 'Shampoo Sachet Pack', 'unit' => 'pack', 'cost' => 80.00, 'sale' => 120.00, 'category' => 'Personal Care'],
+            ['name' => 'Red Chilli Powder 200g', 'unit' => 'pcs', 'cost' => 180.00, 'sale' => 240.00, 'category' => 'Spices'],
+            ['name' => 'Haldi Powder 200g', 'unit' => 'pcs', 'cost' => 140.00, 'sale' => 180.00, 'category' => 'Spices'],
+            ['name' => 'Garam Masala 100g', 'unit' => 'pcs', 'cost' => 160.00, 'sale' => 220.00, 'category' => 'Spices'],
+            ['name' => 'Bread Large', 'unit' => 'pcs', 'cost' => 140.00, 'sale' => 180.00, 'category' => 'Bakery'],
+            ['name' => 'Rusk Pack', 'unit' => 'pack', 'cost' => 200.00, 'sale' => 260.00, 'category' => 'Bakery'],
+            ['name' => 'Frozen Paratha Pack', 'unit' => 'pack', 'cost' => 350.00, 'sale' => 420.00, 'category' => 'Frozen'],
+            ['name' => 'Notebook A4', 'unit' => 'pcs', 'cost' => 120.00, 'sale' => 180.00, 'category' => 'Stationery'],
+            ['name' => 'Ballpoint Pen Pack', 'unit' => 'pack', 'cost' => 80.00, 'sale' => 120.00, 'category' => 'Stationery'],
         ];
 
         shuffle($catalog);
@@ -162,10 +162,10 @@ class DummyDataSeeder extends Seeder
         foreach ($picked as $row) {
             $unit = $this->units->get($row['unit']) ?? $this->units->first();
             $category = $byName->get($row['category']) ?? $fallbackCategory;
-            $discount = random_int(0, 1) === 1 ? random_int(0, 5) * 100 : 0;
-            $sale = (int) $row['sale'];
-            $tax = (int) round($sale * 0.05); // illustrative included tax portion
-            $final = max(0, $sale - $discount);
+            $discount = random_int(0, 1) === 1 ? (float) random_int(0, 5) : 0.0;
+            $sale = round((float) $row['sale'], 2);
+            $tax = round($sale * 0.05, 2); // illustrative included tax portion
+            $final = max(0, round($sale - $discount, 2));
 
             $products->push(Product::create([
                 'shop_id' => $this->shopId,
@@ -174,7 +174,7 @@ class DummyDataSeeder extends Seeder
                 'name' => $row['name'],
                 'sku' => 'SKU-'.$runTag.'-'.str_pad((string) $skuSeq++, 3, '0', STR_PAD_LEFT),
                 'barcode' => '89'.$runTag.str_pad((string) random_int(0, 99999), 5, '0', STR_PAD_LEFT),
-                'unit_cost' => (int) $row['cost'],
+                'unit_cost' => round((float) $row['cost'], 2),
                 'unit_sale_price' => $sale,
                 'tax' => $tax,
                 'unit_discount' => $discount,
@@ -223,7 +223,7 @@ class DummyDataSeeder extends Seeder
                 'phone' => '03'.random_int(0, 9).random_int(0, 9).str_pad((string) random_int(0, 9999999), 7, '0', STR_PAD_LEFT),
                 'email' => null,
                 'address' => $cities[array_rand($cities)].', Pakistan',
-                'khaata_warning_amount' => random_int(0, 1) === 1 ? random_int(50, 200) * 10000 : null,
+                'khaata_warning_amount' => random_int(0, 1) === 1 ? (float) (random_int(50, 200) * 100) : null,
                 'is_active' => true,
             ]));
         }
@@ -309,9 +309,9 @@ class DummyDataSeeder extends Seeder
 
             foreach ($lineProducts as $product) {
                 $qty = (float) random_int(5, 40);
-                $unitCost = (int) $product->unit_cost;
-                $lineTotal = (int) round($qty * $unitCost);
-                $subtotal += $lineTotal;
+                $unitCost = round((float) $product->unit_cost, 2);
+                $lineTotal = round($qty * $unitCost, 2);
+                $subtotal = round($subtotal + $lineTotal, 2);
                 $lineRows[] = [
                     'product' => $product,
                     'qty' => $qty,
@@ -394,7 +394,7 @@ class DummyDataSeeder extends Seeder
 
         for ($i = 0; $i < $count; $i++) {
             $invoice = $pool[$i % $pool->count()];
-            $payAmount = (int) max(10000, round($invoice->total * (random_int(30, 100) / 100)));
+            $payAmount = round(max(100, (float) $invoice->total * (random_int(30, 100) / 100)), 2);
             $paidAt = now()->subDays(random_int(0, 15));
             $method = $methods[array_rand($methods)];
 
@@ -428,7 +428,7 @@ class DummyDataSeeder extends Seeder
             'branch_id' => $this->branchId,
             'opened_by' => $this->userId,
             'opened_at' => now()->subDays(3)->setTime(9, 0),
-            'opening_float' => 500000, // Rs 5,000.00
+            'opening_float' => 5000.00,
             'status' => 'open',
         ]);
     }
@@ -468,28 +468,28 @@ class DummyDataSeeder extends Seeder
 
         foreach ($lineProducts as $product) {
             $qty = (float) random_int(1, 5);
-            $unitPrice = (int) $product->unit_sale_price;
-            $gross = (int) round($qty * $unitPrice);
-            $discount = (int) round($qty * (int) $product->unit_discount);
+            $unitPrice = round((float) $product->unit_sale_price, 2);
+            $gross = round($qty * $unitPrice, 2);
+            $discount = round($qty * (float) $product->unit_discount, 2);
             $discount = min($discount, $gross);
-            $lineTotal = $gross - $discount;
-            $tax = $gross > 0 ? (int) round($qty * (int) $product->tax * ($lineTotal / $gross)) : 0;
+            $lineTotal = round($gross - $discount, 2);
+            $tax = $gross > 0 ? round($qty * (float) $product->tax * ($lineTotal / $gross), 2) : 0.0;
             $tax = min($tax, $lineTotal);
 
             $computed[] = [
                 'product' => $product,
                 'qty' => $qty,
                 'unit_price' => $unitPrice,
-                'unit_cost' => (int) $product->unit_cost,
+                'unit_cost' => round((float) $product->unit_cost, 2),
                 'discount_amount' => $discount,
                 'tax_amount' => $tax,
                 'line_total' => $lineTotal,
             ];
 
-            $subtotal += $lineTotal - $tax;
-            $discountTotal += $discount;
-            $taxTotal += $tax;
-            $total += $lineTotal;
+            $subtotal = round($subtotal + $lineTotal - $tax, 2);
+            $discountTotal = round($discountTotal + $discount, 2);
+            $taxTotal = round($taxTotal + $tax, 2);
+            $total = round($total + $lineTotal, 2);
         }
 
         $saleNumber = 'S-'.$soldAt->format('Ymd').'-'.str_pad((string) $seq, 4, '0', STR_PAD_LEFT).'-'.random_int(100, 999);

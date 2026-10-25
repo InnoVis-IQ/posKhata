@@ -30,10 +30,10 @@
                             <td class="px-4 py-3">{{ $product->name }}</td>
                             <td class="px-4 py-3">{{ $product->sku }}</td>
                             <td class="px-4 py-3">{{ $product->unit_code ?? $product->unit ?? '—' }}</td>
-                            <td class="px-4 py-3">{{ $product->final_unit_price }}</td>
+                            <td class="px-4 py-3 tabular-nums">{{ \App\Support\Money::format($product->final_unit_price) }}</td>
                             <td class="px-4 py-3">
                                 @if (($product->batch_size ?? 0) > 0)
-                                    {{ $product->batch_size }} / −{{ $product->batch_discount }}
+                                    {{ $product->batch_size }} / −{{ \App\Support\Money::format($product->batch_discount) }}
                                 @else
                                     —
                                 @endif

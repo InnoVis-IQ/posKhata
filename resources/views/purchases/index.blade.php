@@ -27,7 +27,7 @@
                         <tr class="border-b border-line last:border-0">
                             <td class="px-4 py-3">{{ $invoice->invoice_number }}</td>
                             <td class="px-4 py-3">{{ $invoice->vendor_name }}</td>
-                            <td class="px-4 py-3">{{ $invoice->total }}</td>
+                            <td class="px-4 py-3 tabular-nums">{{ \App\Support\Money::format($invoice->total) }}</td>
                             <td class="px-4 py-3 text-right"><a href="{{ route('purchases.receive', $invoice->id) }}" class="text-accent hover:underline">Receive</a></td>
                         </tr>
                     @endforeach

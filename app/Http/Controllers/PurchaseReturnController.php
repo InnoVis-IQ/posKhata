@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\GatesRoles;
 use App\Models\Product;
 use App\Models\Vendor;
 use App\Services\PurchaseReturnService;
+use App\Support\Money;
 use App\Support\PosContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -46,7 +47,7 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             'lines' => ['required', 'array', 'min:1'],
             'lines.*.product_id' => ['required', 'integer', Rule::exists('products', 'id')->where('shop_id', $shopId)],
             'lines.*.qty' => ['required', 'numeric', 'gt:0'],
-            'lines.*.unit_cost' => ['nullable', 'integer', 'min:0'],
+            'lines.*.unit_cost' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         try {
@@ -58,7 +59,7 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 'lines' => collect($data['lines'])->map(fn ($l) => array_filter([
                     'product_id' => (int) $l['product_id'],
                     'qty' => $l['qty'],
-                    'unit_cost' => isset($l['unit_cost']) ? (int) $l['unit_cost'] : null,
+                    'unit_cost' => isset($l['unit_cost']) ? Money::round($l['unit_cost']) : null,
                 ], fn ($v) => $v !== null))->values()->all(),
             ]);
         } catch (\RuntimeException|\InvalidArgumentException $e) {
@@ -66,6 +67,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
         }
 
         return redirect()->route('purchases.index')
-            ->with('status', "Purchase return #{$return->id} posted; credit note of {$return->total} (minor units) created.");
+            ->with('status', "Purchase return #{$return->id} posted; credit note of {$return->total} PKR created.");
     }
 }

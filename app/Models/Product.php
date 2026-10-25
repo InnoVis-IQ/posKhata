@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Money columns (unit_cost, unit_sale_price, tax, unit_discount, final_unit_price,
- * batch_discount) are integer minor units. unit_id is required (NOT NULL, RESTRICT).
+ * batch_discount) are major currency units (PKR). unit_id is required (NOT NULL, RESTRICT).
  */
 #[Fillable([
     'shop_id', 'category_id', 'unit_id', 'name', 'sku', 'barcode',
@@ -24,13 +24,13 @@ class Product extends Model
     protected function casts(): array
     {
         return [
-            'unit_cost' => 'integer',
-            'unit_sale_price' => 'integer',
-            'tax' => 'integer',
-            'unit_discount' => 'integer',
-            'final_unit_price' => 'integer',
+            'unit_cost' => 'decimal:2',
+            'unit_sale_price' => 'decimal:2',
+            'tax' => 'decimal:2',
+            'unit_discount' => 'decimal:2',
+            'final_unit_price' => 'decimal:2',
             'batch_size' => 'decimal:3',
-            'batch_discount' => 'integer',
+            'batch_discount' => 'decimal:2',
             'reorder_level' => 'decimal:3',
             'is_active' => 'boolean',
         ];

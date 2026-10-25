@@ -23,7 +23,7 @@ return new class extends Migration
             $table->char('currency_code', 3)->default('PKR');
             $table->unsignedTinyInteger('currency_minor_units')->default(2);
             $table->integer('tax_rate_bps')->default(0);
-            $table->bigInteger('default_khaata_warning_amount')->default(0);
+            $table->decimal('default_khaata_warning_amount', 15, 2)->default(0);
             $table->boolean('multi_branch_enabled')->default(false);
             $table->timestamps();
             $table->softDeletes();

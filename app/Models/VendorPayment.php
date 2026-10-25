@@ -21,7 +21,7 @@ class VendorPayment extends Model
     protected function casts(): array
     {
         return [
-            'amount' => 'integer',
+            'amount' => 'decimal:2',
             'paid_at' => 'datetime',
             'reference_id' => 'integer',
             'created_at' => 'datetime',

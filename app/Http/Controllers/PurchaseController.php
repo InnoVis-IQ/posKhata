@@ -9,6 +9,7 @@ use App\Models\PurchaseReceivingLine;
 use App\Models\Vendor;
 use App\Services\PurchaseReceiveService;
 use App\Services\VendorPayablesService;
+use App\Support\Money;
 use App\Support\PosContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -71,11 +72,11 @@ class PurchaseController extends Controller implements HasMiddleware
             'lines' => ['required', 'array', 'min:1'],
             'lines.*.product_id' => ['required', 'integer', Rule::exists('products', 'id')->where('shop_id', $shopId)],
             'lines.*.qty' => ['required', 'numeric', 'gt:0'],
-            'lines.*.unit_cost' => ['required', 'integer', 'min:0'],
+            'lines.*.unit_cost' => ['required', 'numeric', 'min:0'],
         ]);
 
         try {
-            $applied = 0;
+            $applied = 0.0;
 
             $invoice = DB::transaction(function () use ($data, $shopId, &$applied) {
                 $exists = PurchaseInvoice::query()
@@ -89,11 +90,11 @@ class PurchaseController extends Controller implements HasMiddleware
 
                 $branchId = PosContext::branchId();
                 $rows = [];
-                $subtotal = 0;
+                $subtotal = 0.0;
                 foreach ($data['lines'] as $line) {
                     $qty = round((float) $line['qty'], 3);
-                    $cost = (int) $line['unit_cost'];
-                    $lineTotal = (int) round($qty * $cost);
+                    $cost = Money::round($line['unit_cost']);
+                    $lineTotal = Money::round($qty * $cost);
                     $rows[] = [
                         'product_id' => (int) $line['product_id'],
                         'qty' => number_format($qty, 3, '.', ''),
@@ -101,7 +102,7 @@ class PurchaseController extends Controller implements HasMiddleware
                         'tax_amount' => 0,
                         'line_total' => $lineTotal,
                     ];
-                    $subtotal += $lineTotal;
+                    $subtotal = Money::round($subtotal + $lineTotal);
                 }
 
                 $invoice = PurchaseInvoice::create([
@@ -132,7 +133,7 @@ class PurchaseController extends Controller implements HasMiddleware
 
         $message = "Invoice {$invoice->invoice_number} saved.";
         if ($applied > 0) {
-            $message .= " Vendor credit of {$applied} (minor units) was applied to it.";
+            $message .= " Vendor credit of {$applied} PKR was applied to it.";
         }
 
         return redirect()->route('purchases.index')->with('status', $message);
@@ -155,7 +156,7 @@ class PurchaseController extends Controller implements HasMiddleware
                 'product_id' => (int) $productId,
                 'product_name' => $first->product?->name,
                 'qty' => $left,
-                'unit_cost' => (int) $first->unit_cost,
+                'unit_cost' => Money::round((float) $first->unit_cost),
             ];
         })->filter()->values();
 
@@ -178,7 +179,7 @@ class PurchaseController extends Controller implements HasMiddleware
             'lines' => ['required', 'array', 'min:1'],
             'lines.*.product_id' => ['required', 'integer'],
             'lines.*.qty' => ['nullable', 'numeric', 'min:0'],
-            'lines.*.unit_cost' => ['nullable', 'integer', 'min:0'],
+            'lines.*.unit_cost' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $lines = collect($data['lines'])
@@ -186,7 +187,7 @@ class PurchaseController extends Controller implements HasMiddleware
             ->map(fn ($l) => array_filter([
                 'product_id' => (int) $l['product_id'],
                 'qty' => $l['qty'],
-                'unit_cost' => isset($l['unit_cost']) ? (int) $l['unit_cost'] : null,
+                'unit_cost' => isset($l['unit_cost']) ? Money::round($l['unit_cost']) : null,
             ], fn ($v) => $v !== null))
             ->values()
             ->all();

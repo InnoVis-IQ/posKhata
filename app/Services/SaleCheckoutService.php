@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\KhaataEntry;
 use App\Models\Product;
 use App\Models\Sale;
+use App\Support\Money;
 use App\Support\NumberSequence;
 use App\Support\PosContext;
 use Illuminate\Support\Facades\DB;
@@ -20,15 +21,15 @@ class SaleCheckoutService
 
     /**
      * @param  array{
-     *   lines: array<int, array{product_id:int, qty:int|float|string, unit_price?:int, discount_amount?:int}>,
-     *   payments?: array<int, array{method:string, amount:int}>,
+     *   lines: array<int, array{product_id:int, qty:int|float|string, unit_price?:float|int, discount_amount?:float|int}>,
+     *   payments?: array<int, array{method:string, amount:float|int}>,
      *   customer_id?: int|null,
      *   customer?: array{name?:string, phone?:?string, email?:?string, address?:?string},
      *   save_customer?: bool,
-     *   khaata_payment?: array{amount:int, method:string, receipt_number?:?string, note?:?string},
+     *   khaata_payment?: array{amount:float|int, method:string, receipt_number?:?string, note?:?string},
      *   notes?: ?string,
      *   sold_at?: mixed
-     * }  $data  All money is integer minor units. unit_price / discount_amount on a line are optional overrides
+     * }  $data  All money is major currency units (PKR). unit_price / discount_amount on a line are optional overrides
      *           (discount_amount = TOTAL line discount). Method "khaata" is store credit tender.
      *
      * Sale amounts: line_total is tax-inclusive (gross - discount); tax_amount is the tax portion included in it;
@@ -59,7 +60,7 @@ class SaleCheckoutService
                 ->keyBy('id');
 
             $computed = [];
-            $subtotal = $discountTotal = $taxTotal = $total = 0;
+            $subtotal = $discountTotal = $taxTotal = $total = 0.0;
 
             foreach ($rawLines as $i => $line) {
                 $product = $products->get((int) ($line['product_id'] ?? 0));
@@ -75,45 +76,51 @@ class SaleCheckoutService
                     throw new \InvalidArgumentException("Line ".($i + 1).": quantity must be greater than zero.");
                 }
 
-                $unitPrice = isset($line['unit_price']) ? (int) $line['unit_price'] : (int) $product->unit_sale_price;
-                $gross = (int) round($qty * $unitPrice);
+                $unitPrice = isset($line['unit_price'])
+                    ? Money::round($line['unit_price'])
+                    : Money::round((float) $product->unit_sale_price);
+                $gross = Money::round($qty * $unitPrice);
 
                 if (isset($line['discount_amount'])) {
-                    $discount = (int) $line['discount_amount'];
+                    $discount = Money::round($line['discount_amount']);
                 } else {
-                    $discount = (int) round($qty * (int) $product->unit_discount);
+                    $discount = Money::round($qty * (float) $product->unit_discount);
                     $batchSize = (float) $product->batch_size;
-                    if ($batchSize > 0 && (int) $product->batch_discount > 0) {
-                        $discount += (int) floor($qty / $batchSize + 1e-9) * (int) $product->batch_discount;
+                    if ($batchSize > 0 && (float) $product->batch_discount > 0) {
+                        $discount = Money::round(
+                            $discount + floor($qty / $batchSize + 1e-9) * (float) $product->batch_discount
+                        );
                     }
                 }
                 if ($discount < 0 || $discount > $gross) {
                     throw new \InvalidArgumentException("Line ".($i + 1).": discount must be between 0 and the line amount.");
                 }
 
-                $lineTotal = $gross - $discount;
-                $tax = $gross > 0 ? (int) round($qty * (int) $product->tax * ($lineTotal / $gross)) : 0;
+                $lineTotal = Money::round($gross - $discount);
+                $tax = $gross > 0
+                    ? Money::round($qty * (float) $product->tax * ($lineTotal / $gross))
+                    : 0.0;
                 $tax = min($tax, $lineTotal);
 
                 $computed[] = [
                     'product' => $product,
                     'qty' => $qty,
                     'unit_price' => $unitPrice,
-                    'unit_cost' => (int) $product->unit_cost,
+                    'unit_cost' => Money::round((float) $product->unit_cost),
                     'discount_amount' => $discount,
                     'tax_amount' => $tax,
                     'line_total' => $lineTotal,
                 ];
 
-                $subtotal += $lineTotal - $tax;
-                $discountTotal += $discount;
-                $taxTotal += $tax;
-                $total += $lineTotal;
+                $subtotal = Money::round($subtotal + $lineTotal - $tax);
+                $discountTotal = Money::round($discountTotal + $discount);
+                $taxTotal = Money::round($taxTotal + $tax);
+                $total = Money::round($total + $lineTotal);
             }
 
             // ---- payments ------------------------------------------------------------
             $payments = $this->normalisePayments($data['payments'] ?? [], $total);
-            $khaataTender = (int) collect($payments)->where('method', 'khaata')->sum('amount');
+            $khaataTender = Money::round(collect($payments)->where('method', 'khaata')->sum('amount'));
             if ($khaataTender > 0 && $customer === null) {
                 throw new \InvalidArgumentException('A customer is required to put a sale on khaata.');
             }
@@ -179,13 +186,13 @@ class SaleCheckoutService
 
             // ---- optional khaata pay-down (customer pays old balance during checkout) --
             $paydown = $data['khaata_payment'] ?? null;
-            if (is_array($paydown) && (int) ($paydown['amount'] ?? 0) > 0) {
+            if (is_array($paydown) && Money::round((float) ($paydown['amount'] ?? 0)) > 0) {
                 if ($customer === null) {
                     throw new \InvalidArgumentException('A customer is required to pay down khaata.');
                 }
                 $this->khaataPayments->record(
                     $customer,
-                    (int) $paydown['amount'],
+                    Money::round((float) $paydown['amount']),
                     (string) ($paydown['method'] ?? 'cash'),
                     $paydown['receipt_number'] ?? null,
                     $soldAt,
@@ -243,14 +250,14 @@ class SaleCheckoutService
      * Validates tenders, removes cash change (overpayment must be covered by cash), and returns
      * rows that sum exactly to $total.
      *
-     * @return array<int, array{method:string, amount:int}>
+     * @return array<int, array{method:string, amount:float}>
      */
-    private function normalisePayments(mixed $raw, int $total): array
+    private function normalisePayments(mixed $raw, float $total): array
     {
         $rows = [];
         foreach ((array) $raw as $p) {
             $method = strtolower(trim((string) ($p['method'] ?? '')));
-            $amount = (int) round((float) ($p['amount'] ?? 0));
+            $amount = Money::round((float) ($p['amount'] ?? 0));
             if ($method === '') {
                 throw new \InvalidArgumentException('Each payment needs a method.');
             }
@@ -260,21 +267,21 @@ class SaleCheckoutService
             $rows[] = ['method' => $method, 'amount' => $amount];
         }
 
-        $paid = array_sum(array_column($rows, 'amount'));
+        $paid = Money::round(array_sum(array_column($rows, 'amount')));
 
         if ($paid < $total) {
             throw new \InvalidArgumentException("Payments ({$paid}) do not cover the sale total ({$total}).");
         }
 
-        $change = $paid - $total;
+        $change = Money::round($paid - $total);
         if ($change > 0) {
             for ($i = count($rows) - 1; $i >= 0 && $change > 0; $i--) {
                 if ($rows[$i]['method'] !== 'cash') {
                     continue;
                 }
-                $take = min($change, $rows[$i]['amount']);
-                $rows[$i]['amount'] -= $take;
-                $change -= $take;
+                $take = Money::round(min($change, $rows[$i]['amount']));
+                $rows[$i]['amount'] = Money::round($rows[$i]['amount'] - $take);
+                $change = Money::round($change - $take);
             }
             if ($change > 0) {
                 throw new \InvalidArgumentException('Overpayment can only be returned as cash change.');

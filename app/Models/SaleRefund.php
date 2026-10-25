@@ -21,9 +21,9 @@ class SaleRefund extends Model
         return [
             'restock' => 'boolean',
             'approved_at' => 'datetime',
-            'subtotal' => 'integer',
-            'tax_total' => 'integer',
-            'total' => 'integer',
+            'subtotal' => 'decimal:2',
+            'tax_total' => 'decimal:2',
+            'total' => 'decimal:2',
         ];
     }
 

@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\KhaataEntry;
 use App\Models\KhaataPayment;
 use App\Models\RegisterSession;
+use App\Support\Money;
 use App\Support\NumberSequence;
 use App\Support\PosContext;
 use Carbon\CarbonInterface;
@@ -16,16 +17,16 @@ class KhaataPaymentService
     public function __construct(private readonly RegisterService $register) {}
 
     /** Current outstanding balance (positive = customer owes the shop). */
-    public function balance(Customer $customer): int
+    public function balance(Customer $customer): float
     {
-        return (int) KhaataEntry::query()->where('customer_id', $customer->id)->sum('amount_delta');
+        return Money::round(KhaataEntry::query()->where('customer_id', $customer->id)->sum('amount_delta'));
     }
 
     /**
      * Records a customer payment against their khaata. Creates a khaata_payments row and a
      * khaata_entries row (entry_type=payment, negative amount_delta). Cash requires an open register.
      *
-     * @param  int|float  $amount  minor units
+     * @param  int|float  $amount  major units (PKR)
      */
     public function record(
         Customer $customer,
@@ -36,7 +37,7 @@ class KhaataPaymentService
         ?string $note = null,
         ?int $register_session_id = null,
     ): KhaataPayment {
-        $amount = (int) round($amount);
+        $amount = Money::round($amount);
         if ($amount <= 0) {
             throw new \InvalidArgumentException('Payment amount must be greater than zero.');
         }

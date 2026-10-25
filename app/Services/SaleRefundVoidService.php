@@ -10,6 +10,7 @@ use App\Models\SalePayment;
 use App\Models\SaleRefund;
 use App\Models\SaleRefundLine;
 use App\Models\SaleRefundPayment;
+use App\Support\Money;
 use App\Support\PosContext;
 use Illuminate\Support\Facades\DB;
 
@@ -91,7 +92,7 @@ class SaleRefundVoidService
             }
 
             $rows = [];
-            $total = $tax = 0;
+            $total = $tax = 0.0;
             foreach ($requested as $i => $r) {
                 $line = $saleLines->get((int) ($r['sale_line_id'] ?? 0));
                 if ($line === null) {
@@ -109,12 +110,12 @@ class SaleRefundVoidService
                 $remaining[$line->id] = round($remaining[$line->id] - $qty, 3);
 
                 $ratio = $qty / (float) $line->qty;
-                $amount = (int) round((int) $line->line_total * $ratio);
-                $lineTax = (int) round((int) $line->tax_amount * $ratio);
+                $amount = Money::round((float) $line->line_total * $ratio);
+                $lineTax = Money::round((float) $line->tax_amount * $ratio);
 
                 $rows[] = ['line' => $line, 'qty' => $qty, 'amount' => $amount];
-                $total += $amount;
-                $tax += min($lineTax, $amount);
+                $total = Money::round($total + $amount);
+                $tax = Money::round($tax + min($lineTax, $amount));
             }
 
             $refund = SaleRefund::create([
@@ -126,7 +127,7 @@ class SaleRefundVoidService
                 'restock' => (bool) ($data['restock'] ?? true),
                 'reason' => $reason,
                 'requested_by' => $user->id,
-                'subtotal' => $total - $tax,
+                'subtotal' => Money::round($total - $tax),
                 'tax_total' => $tax,
                 'total' => $total,
             ]);
@@ -151,7 +152,7 @@ class SaleRefundVoidService
      * null => refund back to the original tender methods (net of earlier refunds), in the order paid.
      * Cash needs an open register session at the sale's branch. "khaata" reduces the customer's balance.
      *
-     * @param  array<int, array{method:string, amount:int}>|null  $payments
+     * @param  array<int, array{method:string, amount:float|int}>|null  $payments
      */
     public function approve(SaleRefund $refund, ?array $payments = null): SaleRefund
     {
@@ -172,12 +173,12 @@ class SaleRefundVoidService
             $sale = Sale::query()->whereKey($refund->sale_id)->lockForUpdate()->firstOrFail();
             $payments = $payments === null
                 ? $this->defaultPayments($sale, $refund)
-                : $this->normalisePayments($payments, (int) $refund->total);
+                : $this->normalisePayments($payments, Money::round((float) $refund->total));
 
             $needsCash = collect($payments)->contains(fn ($p) => $p['method'] === 'cash');
             $session = $needsCash ? $this->register->requireOpenSession((int) $refund->branch_id) : null;
 
-            $khaataAmount = (int) collect($payments)->where('method', 'khaata')->sum('amount');
+            $khaataAmount = Money::round(collect($payments)->where('method', 'khaata')->sum('amount'));
             if ($khaataAmount > 0 && $sale->customer_id === null) {
                 throw new \RuntimeException('Cannot refund to khaata: the sale has no customer.');
             }
@@ -276,20 +277,20 @@ class SaleRefundVoidService
         return $out;
     }
 
-    /** @return array<int, array{method:string, amount:int}> */
-    private function normalisePayments(array $payments, int $total): array
+    /** @return array<int, array{method:string, amount:float}> */
+    private function normalisePayments(array $payments, float $total): array
     {
         $rows = [];
         foreach ($payments as $p) {
             $method = strtolower(trim((string) ($p['method'] ?? '')));
-            $amount = (int) round((float) ($p['amount'] ?? 0));
+            $amount = Money::round((float) ($p['amount'] ?? 0));
             if ($method === '' || $amount <= 0) {
                 throw new \InvalidArgumentException('Each refund payment needs a method and a positive amount.');
             }
             $rows[] = ['method' => $method, 'amount' => $amount];
         }
-        $sum = array_sum(array_column($rows, 'amount'));
-        if ($sum !== $total) {
+        $sum = Money::round(array_sum(array_column($rows, 'amount')));
+        if ($sum !== Money::round($total)) {
             throw new \InvalidArgumentException("Refund payments ({$sum}) must equal the refund total ({$total}).");
         }
 
@@ -301,7 +302,7 @@ class SaleRefundVoidService
     {
         $paid = [];
         foreach (SalePayment::query()->where('sale_id', $sale->id)->orderBy('id')->get() as $p) {
-            $paid[$p->method] = ($paid[$p->method] ?? 0) + (int) $p->amount;
+            $paid[$p->method] = Money::round(($paid[$p->method] ?? 0) + (float) $p->amount);
         }
 
         $refunded = SaleRefundPayment::query()
@@ -311,17 +312,17 @@ class SaleRefundVoidService
             ->groupBy('method')
             ->pluck('total', 'method');
 
-        $left = (int) $refund->total;
+        $left = Money::round((float) $refund->total);
         $rows = [];
         foreach ($paid as $method => $amount) {
             if ($left <= 0) {
                 break;
             }
-            $available = $amount - (int) ($refunded[$method] ?? 0);
-            $take = min($left, $available);
+            $available = Money::round($amount - (float) ($refunded[$method] ?? 0));
+            $take = Money::round(min($left, $available));
             if ($take > 0) {
                 $rows[] = ['method' => $method, 'amount' => $take];
-                $left -= $take;
+                $left = Money::round($left - $take);
             }
         }
 

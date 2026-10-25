@@ -42,13 +42,13 @@ return new class extends Migration
             $table->string('name');
             $table->string('sku', 100)->nullable();
             $table->string('barcode', 100)->nullable();
-            $table->bigInteger('unit_cost')->default(0);
-            $table->bigInteger('unit_sale_price')->default(0); // tax-inclusive
-            $table->bigInteger('tax')->default(0); // tax amount in minor units; default from shop tax_rate_bps, overridable
-            $table->bigInteger('unit_discount')->default(0);
-            $table->bigInteger('final_unit_price')->default(0); // unit_sale_price - unit_discount
+            $table->decimal('unit_cost', 15, 2)->default(0);
+            $table->decimal('unit_sale_price', 15, 2)->default(0); // tax-inclusive, major units (PKR)
+            $table->decimal('tax', 15, 2)->default(0); // tax amount in major units; default from shop tax_rate_bps, overridable
+            $table->decimal('unit_discount', 15, 2)->default(0);
+            $table->decimal('final_unit_price', 15, 2)->default(0); // unit_sale_price - unit_discount
             $table->decimal('batch_size', 12, 3)->default(0); // 0 = no batch deal
-            $table->bigInteger('batch_discount')->default(0); // off per full batch of batch_size
+            $table->decimal('batch_discount', 15, 2)->default(0); // off per full batch of batch_size
             $table->decimal('reorder_level', 12, 3)->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();

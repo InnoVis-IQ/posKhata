@@ -21,7 +21,7 @@ class Shop extends Model
         return [
             'currency_minor_units' => 'integer',
             'tax_rate_bps' => 'integer',
-            'default_khaata_warning_amount' => 'integer',
+            'default_khaata_warning_amount' => 'decimal:2',
             'multi_branch_enabled' => 'boolean',
         ];
     }

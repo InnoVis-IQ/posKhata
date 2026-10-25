@@ -18,8 +18,8 @@
                 </select>
             </div>
             <div>
-                <label class="mb-1 block text-sm font-medium" for="amount">Amount (minor units)</label>
-                <input id="amount" name="amount" type="number" required class="w-full rounded-lg border border-line px-3 py-2 text-sm">
+                <label class="mb-1 block text-sm font-medium" for="amount">Amount (PKR)</label>
+                <input id="amount" name="amount" type="number" step="0.01" min="0.01" required class="w-full rounded-lg border border-line px-3 py-2 text-sm">
             </div>
             <div>
                 <label class="mb-1 block text-sm font-medium" for="method">Method</label>
@@ -42,7 +42,7 @@
             <template x-for="(row, index) in allocations" :key="index">
                 <div class="grid gap-2 md:grid-cols-2">
                     <input type="number" :name="`allocations[${index}][purchase_invoice_id]`" x-model="row.purchase_invoice_id" placeholder="Invoice ID" class="rounded-lg border border-line px-3 py-2 text-sm">
-                    <input type="number" :name="`allocations[${index}][amount]`" x-model="row.amount" placeholder="Amount" class="rounded-lg border border-line px-3 py-2 text-sm">
+                    <input type="number" step="0.01" min="0" :name="`allocations[${index}][amount]`" x-model="row.amount" placeholder="Amount (PKR)" class="rounded-lg border border-line px-3 py-2 text-sm">
                 </div>
             </template>
             <button type="button" class="text-sm text-accent" @click="allocations.push({ purchase_invoice_id: '', amount: '' })">+ Allocation row</button>

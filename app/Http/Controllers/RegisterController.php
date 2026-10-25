@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\GatesRoles;
 use App\Models\RegisterSession;
 use App\Services\RegisterService;
+use App\Support\Money;
 use App\Support\PosContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -31,10 +32,10 @@ class RegisterController extends Controller
 
     public function open(Request $request): RedirectResponse
     {
-        $data = $request->validate(['opening_float' => ['required', 'integer', 'min:0']]);
+        $data = $request->validate(['opening_float' => ['required', 'numeric', 'min:0']]);
 
         try {
-            $this->register->open((int) $data['opening_float']);
+            $this->register->open(Money::round($data['opening_float']));
         } catch (\RuntimeException|\InvalidArgumentException $e) {
             return $this->backWithError($e);
         }
@@ -47,12 +48,12 @@ class RegisterController extends Controller
         $data = $request->validate([
             'direction' => ['required', Rule::in(RegisterService::DIRECTIONS)],
             'reason' => ['required', Rule::in(RegisterService::REASONS)],
-            'amount' => ['required', 'integer', 'min:1'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
             'note' => ['nullable', 'string', 'max:1000'],
         ]);
 
         try {
-            $this->register->addMovement($data['direction'], $data['reason'], (int) $data['amount'], $data['note'] ?? null);
+            $this->register->addMovement($data['direction'], $data['reason'], Money::round($data['amount']), $data['note'] ?? null);
         } catch (\RuntimeException|\InvalidArgumentException $e) {
             return $this->backWithError($e);
         }
@@ -62,17 +63,17 @@ class RegisterController extends Controller
 
     public function close(Request $request): RedirectResponse
     {
-        $data = $request->validate(['counted_cash' => ['required', 'integer', 'min:0']]);
+        $data = $request->validate(['counted_cash' => ['required', 'numeric', 'min:0']]);
 
         try {
-            $session = $this->register->close((int) $data['counted_cash']);
+            $session = $this->register->close(Money::round($data['counted_cash']));
         } catch (\RuntimeException|\InvalidArgumentException $e) {
             return $this->backWithError($e);
         }
 
         return redirect()->route('register.show')->with(
             'status',
-            "Register closed. Expected {$session->expected_cash}, counted {$session->counted_cash}, variance {$session->variance} (minor units)."
+            "Register closed. Expected {$session->expected_cash}, counted {$session->counted_cash}, variance {$session->variance} PKR."
         );
     }
 

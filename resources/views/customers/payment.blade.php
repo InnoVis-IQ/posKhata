@@ -6,10 +6,10 @@
 @section('content')
     <form method="POST" action="{{ route('customers.payment.store', $customer->id) }}" class="mx-auto max-w-xl space-y-4 rounded-xl border border-line bg-panel p-6">
         @csrf
-        <p class="text-sm text-muted">Current balance: {{ $customer->balance }} (minor units).</p>
+        <p class="text-sm text-muted">Current balance: {{ \App\Support\Money::format($customer->balance) }} PKR.</p>
         <div>
             <label class="mb-1 block text-sm font-medium" for="amount">Amount</label>
-            <input id="amount" name="amount" type="number" required class="w-full rounded-lg border border-line px-3 py-2 text-sm">
+            <input id="amount" name="amount" type="number" step="0.01" min="0.01" required class="w-full rounded-lg border border-line px-3 py-2 text-sm">
         </div>
         <div>
             <label class="mb-1 block text-sm font-medium" for="method">Method</label>

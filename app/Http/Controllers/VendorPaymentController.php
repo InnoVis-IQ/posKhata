@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\GatesRoles;
 use App\Models\PurchaseInvoice;
 use App\Models\Vendor;
 use App\Services\VendorPayablesService;
+use App\Support\Money;
 use App\Support\PosContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,9 +36,9 @@ class VendorPaymentController extends Controller implements HasMiddleware
             ->orderBy('invoice_date')
             ->orderBy('id')
             ->get()
-            ->filter(fn (PurchaseInvoice $i) => (int) $i->total - (int) $i->allocated_sum > 0)
+            ->filter(fn (PurchaseInvoice $i) => Money::round((float) $i->total - (float) $i->allocated_sum) > 0)
             ->each(function (PurchaseInvoice $i) {
-                $i->setAttribute('owed', (int) $i->total - (int) $i->allocated_sum);
+                $i->setAttribute('owed', Money::round((float) $i->total - (float) $i->allocated_sum));
                 $i->setAttribute('vendor_name', $i->vendor?->name);
             })
             ->values();
@@ -54,20 +55,20 @@ class VendorPaymentController extends Controller implements HasMiddleware
 
         $data = $request->validate([
             'vendor_id' => ['required', 'integer', Rule::exists('vendors', 'id')->where('shop_id', $shopId)],
-            'amount' => ['required', 'integer', 'min:1'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
             'method' => ['required', Rule::in(['cash', 'bank', 'card', 'other'])],
             'paid_at' => ['nullable', 'date'],
             'note' => ['nullable', 'string', 'max:1000'],
             'allocations' => ['nullable', 'array'],
             'allocations.*.purchase_invoice_id' => ['nullable', 'integer'],
-            'allocations.*.amount' => ['nullable', 'integer', 'min:0'],
+            'allocations.*.amount' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         // Default is FIFO (null); only honour the allocation rows when the override box is ticked.
         $allocations = null;
         if ($request->boolean('manual_allocation')) {
             $allocations = collect($data['allocations'] ?? [])
-                ->filter(fn ($row) => ! empty($row['purchase_invoice_id']) && (int) ($row['amount'] ?? 0) > 0)
+                ->filter(fn ($row) => ! empty($row['purchase_invoice_id']) && Money::round((float) ($row['amount'] ?? 0)) > 0)
                 ->values()
                 ->all();
 
@@ -82,7 +83,7 @@ class VendorPaymentController extends Controller implements HasMiddleware
             $vendor = Vendor::query()->where('shop_id', $shopId)->findOrFail((int) $data['vendor_id']);
             $payment = $this->payables->pay(
                 $vendor,
-                (int) $data['amount'],
+                Money::round($data['amount']),
                 $data['method'],
                 $allocations,
                 $data['note'] ?? null,
@@ -92,9 +93,9 @@ class VendorPaymentController extends Controller implements HasMiddleware
             return $this->backWithError($e);
         }
 
-        $allocated = (int) $payment->allocations->sum('amount');
+        $allocated = Money::round($payment->allocations->sum('amount'));
         $message = "Payment of {$payment->amount} to {$vendor->name} recorded ({$allocated} allocated to invoices";
-        $message .= $allocated < $payment->amount ? '; the rest is held as vendor credit).' : ').';
+        $message .= $allocated < Money::round((float) $payment->amount) ? '; the rest is held as vendor credit).' : ').';
 
         return redirect()->route('purchases.index')->with('status', $message);
     }

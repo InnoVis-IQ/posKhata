@@ -21,11 +21,11 @@ class SaleLine extends Model
     {
         return [
             'qty' => 'decimal:3',
-            'unit_price' => 'integer',
-            'unit_cost' => 'integer',
-            'discount_amount' => 'integer',
-            'tax_amount' => 'integer',
-            'line_total' => 'integer',
+            'unit_price' => 'decimal:2',
+            'unit_cost' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
+            'tax_amount' => 'decimal:2',
+            'line_total' => 'decimal:2',
         ];
     }
 

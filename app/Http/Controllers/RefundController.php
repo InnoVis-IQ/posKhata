@@ -110,7 +110,7 @@ class RefundController extends Controller implements HasMiddleware
         try {
             $payments = null;
             if (preg_match(self::PAYOUT_TAG, (string) $model->reason, $m)) {
-                $payments = [['method' => $m[1], 'amount' => (int) $model->total]];
+                $payments = [['method' => $m[1], 'amount' => (float) $model->total]];
             }
 
             $this->refunds->approve($model, $payments);

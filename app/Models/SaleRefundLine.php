@@ -18,7 +18,7 @@ class SaleRefundLine extends Model
     {
         return [
             'qty' => 'decimal:3',
-            'amount' => 'integer',
+            'amount' => 'decimal:2',
         ];
     }
 

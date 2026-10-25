@@ -23,10 +23,10 @@ class RegisterSession extends Model
             'opened_at' => 'datetime',
             'closed_at' => 'datetime',
             'reopened_at' => 'datetime',
-            'opening_float' => 'integer',
-            'expected_cash' => 'integer',
-            'counted_cash' => 'integer',
-            'variance' => 'integer',
+            'opening_float' => 'decimal:2',
+            'expected_cash' => 'decimal:2',
+            'counted_cash' => 'decimal:2',
+            'variance' => 'decimal:2',
         ];
     }
 

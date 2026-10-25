@@ -20,7 +20,7 @@ class KhaataPayment extends Model
     protected function casts(): array
     {
         return [
-            'amount' => 'integer',
+            'amount' => 'decimal:2',
             'received_at' => 'datetime',
             'created_at' => 'datetime',
         ];

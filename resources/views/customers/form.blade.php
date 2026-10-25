@@ -24,8 +24,8 @@
             <textarea id="address" name="address" rows="2" class="w-full rounded-lg border border-line px-3 py-2 text-sm">{{ old('address', $customer->address ?? '') }}</textarea>
         </div>
         <div>
-            <label class="mb-1 block text-sm font-medium" for="khaata_warning_amount">Khaata warning override (minor; blank = shop default)</label>
-            <input id="khaata_warning_amount" name="khaata_warning_amount" type="number" value="{{ old('khaata_warning_amount', $customer->khaata_warning_amount ?? '') }}" class="w-full rounded-lg border border-line px-3 py-2 text-sm">
+            <label class="mb-1 block text-sm font-medium" for="khaata_warning_amount">Khaata warning override (PKR; blank = shop default)</label>
+            <input id="khaata_warning_amount" name="khaata_warning_amount" type="number" step="0.01" min="0" value="{{ old('khaata_warning_amount', $customer->khaata_warning_amount ?? '') }}" class="w-full rounded-lg border border-line px-3 py-2 text-sm">
         </div>
         <label class="flex items-center gap-2 text-sm">
             <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $customer->is_active ?? true))>

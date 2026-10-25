@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleLine;
+use App\Support\Money;
 use App\Support\PosContext;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
@@ -23,7 +24,7 @@ class DashboardController extends Controller
         $yearStart = now()->subYear()->startOfDay();
 
         $lowStock = $this->lowStock($shopId, $branchId);
-        $creditAlerts = $this->creditAlerts($shopId, (int) ($shop->default_khaata_warning_amount ?? 0));
+        $creditAlerts = $this->creditAlerts($shopId, Money::round($shop->default_khaata_warning_amount ?? 0));
 
         return view('dashboard', [
             'lowStock' => $lowStock->take(10),
@@ -54,7 +55,7 @@ class DashboardController extends Controller
      * Active customers whose khaata balance is at least 80% of their warning threshold
      * (per-customer override, else shop default). Threshold 0 = no warning.
      */
-    private function creditAlerts(int $shopId, int $defaultThreshold): Collection
+    private function creditAlerts(int $shopId, float $defaultThreshold): Collection
     {
         return Customer::query()
             ->where('shop_id', $shopId)
@@ -63,9 +64,9 @@ class DashboardController extends Controller
             ->orderBy('name')
             ->get()
             ->map(function (Customer $customer) use ($defaultThreshold) {
-                $threshold = (int) ($customer->khaata_warning_amount ?? $defaultThreshold);
-                $balance = (int) ($customer->balance ?? 0);
-                $warnAt = $threshold > 0 ? (int) round($threshold * 0.8) : 0;
+                $threshold = Money::round($customer->khaata_warning_amount ?? $defaultThreshold);
+                $balance = Money::round($customer->balance ?? 0);
+                $warnAt = $threshold > 0 ? Money::round($threshold * 0.8) : 0.0;
 
                 $customer->setAttribute('balance', $balance);
                 $customer->setAttribute('threshold', $threshold);
@@ -102,7 +103,7 @@ class DashboardController extends Controller
             return (object) [
                 'date' => $day->toDateString(),
                 'label' => $day->format('D'),
-                'amount' => (int) ($byDay[$day->toDateString()] ?? 0),
+                'amount' => Money::round($byDay[$day->toDateString()] ?? 0),
             ];
         });
     }
@@ -171,8 +172,8 @@ class DashboardController extends Controller
             ->whereIn('id', $topIds)
             ->get(['id', 'name', 'phone'])
             ->map(function (Customer $customer) use ($yearAmounts, $monthAmounts) {
-                $customer->setAttribute('amount_30d', (int) ($monthAmounts[$customer->id] ?? 0));
-                $customer->setAttribute('amount_year', (int) ($yearAmounts[$customer->id] ?? 0));
+                $customer->setAttribute('amount_30d', Money::round($monthAmounts[$customer->id] ?? 0));
+                $customer->setAttribute('amount_year', Money::round($yearAmounts[$customer->id] ?? 0));
 
                 return $customer;
             })

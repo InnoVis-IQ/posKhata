@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\GatesRoles;
+use App\Support\Money;
 use App\Support\PosContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,7 +37,7 @@ class SettingsController extends Controller implements HasMiddleware
             'receipt_footer' => ['nullable', 'string', 'max:2000'],
             'currency_code' => ['required', 'string', 'size:3'],
             'tax_rate_bps' => ['required', 'integer', 'min:0', 'max:100000'],
-            'default_khaata_warning_amount' => ['nullable', 'integer', 'min:0'],
+            'default_khaata_warning_amount' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $shop = PosContext::shop();
@@ -50,7 +51,7 @@ class SettingsController extends Controller implements HasMiddleware
             'receipt_footer' => $data['receipt_footer'] ?? null,
             'currency_code' => strtoupper($data['currency_code']),
             'tax_rate_bps' => (int) $data['tax_rate_bps'],
-            'default_khaata_warning_amount' => (int) ($data['default_khaata_warning_amount'] ?? 0),
+            'default_khaata_warning_amount' => Money::round($data['default_khaata_warning_amount'] ?? 0),
             'multi_branch_enabled' => $request->boolean('multi_branch_enabled'),
         ];
 

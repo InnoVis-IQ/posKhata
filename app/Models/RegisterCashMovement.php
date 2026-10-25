@@ -20,7 +20,7 @@ class RegisterCashMovement extends Model
     protected function casts(): array
     {
         return [
-            'amount' => 'integer',
+            'amount' => 'decimal:2',
             'reference_id' => 'integer',
             'created_at' => 'datetime',
         ];

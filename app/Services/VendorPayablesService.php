@@ -7,6 +7,7 @@ use App\Models\PurchaseReturn;
 use App\Models\Vendor;
 use App\Models\VendorPayment;
 use App\Models\VendorPaymentAllocation;
+use App\Support\Money;
 use App\Support\PosContext;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
@@ -28,41 +29,41 @@ class VendorPayablesService
 
     // ---------------------------------------------------------------- owed helpers
 
-    public function invoiceAllocated(PurchaseInvoice $invoice): int
+    public function invoiceAllocated(PurchaseInvoice $invoice): float
     {
-        return (int) VendorPaymentAllocation::query()->where('purchase_invoice_id', $invoice->id)->sum('amount');
+        return Money::round(VendorPaymentAllocation::query()->where('purchase_invoice_id', $invoice->id)->sum('amount'));
     }
 
-    public function invoiceOwed(PurchaseInvoice $invoice): int
+    public function invoiceOwed(PurchaseInvoice $invoice): float
     {
-        return max(0, (int) $invoice->total - $this->invoiceAllocated($invoice));
+        return max(0.0, Money::round((float) $invoice->total - $this->invoiceAllocated($invoice)));
     }
 
-    public function paymentUnallocated(VendorPayment $payment): int
+    public function paymentUnallocated(VendorPayment $payment): float
     {
-        $allocated = (int) VendorPaymentAllocation::query()->where('vendor_payment_id', $payment->id)->sum('amount');
+        $allocated = Money::round(VendorPaymentAllocation::query()->where('vendor_payment_id', $payment->id)->sum('amount'));
 
-        return max(0, (int) $payment->amount - $allocated);
+        return max(0.0, Money::round((float) $payment->amount - $allocated));
     }
 
     /** Sum of unallocated remainders across all of the vendor's payments / credit notes. */
-    public function vendorCredit(Vendor $vendor): int
+    public function vendorCredit(Vendor $vendor): float
     {
-        $paid = (int) VendorPayment::query()->where('vendor_id', $vendor->id)->sum('amount');
-        $allocated = (int) VendorPaymentAllocation::query()
+        $paid = Money::round(VendorPayment::query()->where('vendor_id', $vendor->id)->sum('amount'));
+        $allocated = Money::round(VendorPaymentAllocation::query()
             ->whereIn('vendor_payment_id', VendorPayment::query()->where('vendor_id', $vendor->id)->select('id'))
-            ->sum('amount');
+            ->sum('amount'));
 
-        return max(0, $paid - $allocated);
+        return max(0.0, Money::round($paid - $allocated));
     }
 
     /** Net owed to vendor: invoices - all payments & credit notes (negative = vendor owes us / advance). */
-    public function vendorOwed(Vendor $vendor): int
+    public function vendorOwed(Vendor $vendor): float
     {
-        $invoiced = (int) PurchaseInvoice::query()->where('vendor_id', $vendor->id)->sum('total');
-        $paid = (int) VendorPayment::query()->where('vendor_id', $vendor->id)->sum('amount');
+        $invoiced = Money::round(PurchaseInvoice::query()->where('vendor_id', $vendor->id)->sum('total'));
+        $paid = Money::round(VendorPayment::query()->where('vendor_id', $vendor->id)->sum('amount'));
 
-        return $invoiced - $paid;
+        return Money::round($invoiced - $paid);
     }
 
     /** @return Collection<int, PurchaseInvoice> invoices with owed > 0, oldest first (FIFO order). */
@@ -74,7 +75,7 @@ class VendorPayablesService
             ->orderBy('invoice_date')
             ->orderBy('id')
             ->get()
-            ->filter(fn (PurchaseInvoice $i) => (int) $i->total - (int) $i->allocated_sum > 0)
+            ->filter(fn (PurchaseInvoice $i) => Money::round((float) $i->total - (float) $i->allocated_sum) > 0)
             ->values();
     }
 
@@ -95,7 +96,7 @@ class VendorPayablesService
         ?string $note = null,
         CarbonInterface|string|null $paidAt = null,
     ): VendorPayment {
-        $amount = (int) round($amount);
+        $amount = Money::round($amount);
         if ($amount <= 0) {
             throw new \InvalidArgumentException('Payment amount must be greater than zero.');
         }
@@ -146,12 +147,12 @@ class VendorPayablesService
      *
      * @return Collection<int, VendorPaymentAllocation>
      */
-    public function allocateFifo(VendorPayment $payment, ?int $max = null): Collection
+    public function allocateFifo(VendorPayment $payment, ?float $max = null): Collection
     {
         return DB::transaction(function () use ($payment, $max) {
             $available = $this->paymentUnallocated($payment);
             if ($max !== null) {
-                $available = min($available, $max);
+                $available = min($available, Money::round($max));
             }
 
             $created = collect();
@@ -164,9 +165,9 @@ class VendorPayablesService
                 if ($available <= 0) {
                     break;
                 }
-                $apply = min($available, (int) $invoice->total - (int) $invoice->allocated_sum);
+                $apply = Money::round(min($available, Money::round((float) $invoice->total - (float) $invoice->allocated_sum)));
                 $created->push($this->createAllocation($payment, $invoice, $apply));
-                $available -= $apply;
+                $available = Money::round($available - $apply);
             }
 
             return $created;
@@ -175,17 +176,17 @@ class VendorPayablesService
 
     /**
      * Call when a new purchase invoice is created: consumes the vendor's unallocated payments /
-     * credit notes (oldest first) against it. Returns the total applied (minor units).
+     * credit notes (oldest first) against it. Returns the total applied (major units / PKR).
      */
-    public function applyUnallocatedCreditsToInvoice(PurchaseInvoice $invoice): int
+    public function applyUnallocatedCreditsToInvoice(PurchaseInvoice $invoice): float
     {
         return DB::transaction(function () use ($invoice) {
             $invoice = PurchaseInvoice::query()->whereKey($invoice->id)->lockForUpdate()->firstOrFail();
             $owed = $this->invoiceOwed($invoice);
-            $applied = 0;
+            $applied = 0.0;
 
             if ($owed <= 0) {
-                return 0;
+                return 0.0;
             }
 
             $payments = VendorPayment::query()
@@ -202,10 +203,10 @@ class VendorPayablesService
                 if ($free <= 0) {
                     continue;
                 }
-                $apply = min($free, $owed);
+                $apply = Money::round(min($free, $owed));
                 $this->createAllocation($payment, $invoice, $apply);
-                $owed -= $apply;
-                $applied += $apply;
+                $owed = Money::round($owed - $apply);
+                $applied = Money::round($applied + $apply);
             }
 
             return $applied;
@@ -219,7 +220,7 @@ class VendorPayablesService
      */
     public function creditNoteFromReturn(PurchaseReturn $return): ?VendorPayment
     {
-        if ((int) $return->total <= 0) {
+        if (Money::round((float) $return->total) <= 0) {
             return null;
         }
 
@@ -237,7 +238,7 @@ class VendorPayablesService
                 'shop_id' => $return->shop_id,
                 'branch_id' => $return->branch_id,
                 'vendor_id' => $return->vendor_id,
-                'amount' => (int) $return->total,
+                'amount' => Money::round((float) $return->total),
                 'method' => self::CREDIT_NOTE_METHOD,
                 'paid_at' => now(),
                 'register_session_id' => null,
@@ -253,7 +254,7 @@ class VendorPayablesService
                     ->where('vendor_id', $return->vendor_id)
                     ->first();
                 if ($invoice !== null) {
-                    $apply = min($this->paymentUnallocated($payment), $this->invoiceOwed($invoice));
+                    $apply = Money::round(min($this->paymentUnallocated($payment), $this->invoiceOwed($invoice)));
                     if ($apply > 0) {
                         $this->createAllocation($payment, $invoice, $apply);
                     }
@@ -268,31 +269,31 @@ class VendorPayablesService
 
     // ---------------------------------------------------------------- internals
 
-    /** @return array<int, int> [invoice_id => amount] */
+    /** @return array<int, float> [invoice_id => amount] */
     private function normaliseAllocations(array $allocations): array
     {
         $map = [];
         foreach ($allocations as $key => $value) {
             if (is_array($value)) {
                 $invoiceId = (int) ($value['purchase_invoice_id'] ?? $value['invoice_id'] ?? 0);
-                $amt = (int) round((float) ($value['amount'] ?? 0));
+                $amt = Money::round((float) ($value['amount'] ?? 0));
             } else {
                 $invoiceId = (int) $key;
-                $amt = (int) round((float) $value);
+                $amt = Money::round((float) $value);
             }
             if ($invoiceId <= 0 || $amt <= 0) {
                 throw new \InvalidArgumentException('Each allocation needs a purchase invoice and a positive amount.');
             }
-            $map[$invoiceId] = ($map[$invoiceId] ?? 0) + $amt;
+            $map[$invoiceId] = Money::round(($map[$invoiceId] ?? 0) + $amt);
         }
 
         return $map;
     }
 
-    /** @param array<int, int> $map */
+    /** @param array<int, float> $map */
     private function allocateExplicit(VendorPayment $payment, Vendor $vendor, array $map): void
     {
-        if (array_sum($map) > (int) $payment->amount) {
+        if (Money::round(array_sum($map)) > Money::round((float) $payment->amount)) {
             throw new \InvalidArgumentException('Allocations exceed the payment amount.');
         }
 
@@ -318,14 +319,14 @@ class VendorPayablesService
         }
     }
 
-    private function createAllocation(VendorPayment $payment, PurchaseInvoice $invoice, int $amount): VendorPaymentAllocation
+    private function createAllocation(VendorPayment $payment, PurchaseInvoice $invoice, float $amount): VendorPaymentAllocation
     {
         return VendorPaymentAllocation::create([
             'shop_id' => $payment->shop_id,
             'branch_id' => $payment->branch_id,
             'vendor_payment_id' => $payment->id,
             'purchase_invoice_id' => $invoice->id,
-            'amount' => $amount,
+            'amount' => Money::round($amount),
         ]);
     }
 }

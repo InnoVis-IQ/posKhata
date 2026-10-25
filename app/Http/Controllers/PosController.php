@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Unit;
 use App\Services\KhaataPaymentService;
 use App\Services\SaleCheckoutService;
+use App\Support\Money;
 use App\Support\PosContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,7 +37,7 @@ class PosController extends Controller
             // The POS shows the net price (sale price minus per-unit discount); never trust a stale stored column.
             ->each(fn (Product $p) => $p->setAttribute(
                 'final_unit_price',
-                max(0, (int) $p->unit_sale_price - (int) $p->unit_discount)
+                max(0, Money::round((float) $p->unit_sale_price - (float) $p->unit_discount))
             ));
 
         return view('pos.index', [
@@ -61,21 +62,21 @@ class PosController extends Controller
             'lines' => ['required', 'array', 'min:1'],
             'lines.*.product_id' => ['required', 'integer'],
             'lines.*.qty' => ['required', 'numeric', 'gt:0'],
-            'discount_total' => ['nullable', 'integer', 'min:0'],
+            'discount_total' => ['nullable', 'numeric', 'min:0'],
             'payments' => ['nullable', 'array'],
             'customer_id' => ['nullable', 'integer'],
             'customer_name' => ['nullable', 'string', 'max:255'],
             'customer_phone' => ['nullable', 'string', 'max:50'],
-            'khaata_payment_amount' => ['nullable', 'integer', 'min:0'],
+            'khaata_payment_amount' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ]);
 
         try {
             $payments = $this->payments((array) ($data['payments'] ?? []));
-            $khaataTender = (int) collect($payments)->where('method', 'khaata')->sum('amount');
+            $khaataTender = Money::round(collect($payments)->where('method', 'khaata')->sum('amount'));
 
             $payload = [
-                'lines' => $this->lines($data['lines'], (int) ($data['discount_total'] ?? 0)),
+                'lines' => $this->lines($data['lines'], Money::round($data['discount_total'] ?? 0)),
                 'payments' => $payments,
                 'notes' => $data['notes'] ?? null,
             ];
@@ -91,7 +92,7 @@ class PosController extends Controller
                 $payload['save_customer'] = $request->boolean('save_customer') || $khaataTender > 0;
             }
 
-            $paydown = (int) ($data['khaata_payment_amount'] ?? 0);
+            $paydown = Money::round($data['khaata_payment_amount'] ?? 0);
             if ($paydown > 0) {
                 $payload['khaata_payment'] = ['amount' => $paydown, 'method' => 'cash'];
             }
@@ -105,7 +106,7 @@ class PosController extends Controller
 
         if ($sale->customer_id !== null) {
             $customer = Customer::query()->find($sale->customer_id);
-            $threshold = (int) ($customer?->khaata_warning_amount ?? PosContext::shop()->default_khaata_warning_amount ?? 0);
+            $threshold = Money::round($customer?->khaata_warning_amount ?? PosContext::shop()->default_khaata_warning_amount ?? 0);
             if ($customer !== null && $threshold > 0 && $this->khaata->balance($customer) >= $threshold) {
                 $redirect->with('warning', "{$customer->name}'s khaata balance has reached the warning threshold.");
             }
@@ -117,7 +118,7 @@ class PosController extends Controller
     /**
      * Accepts either payments[method]=amount (the POS form) or a list of {method, amount} rows.
      *
-     * @return array<int, array{method:string, amount:int}>
+     * @return array<int, array{method:string, amount:float}>
      */
     private function payments(array $raw): array
     {
@@ -125,10 +126,10 @@ class PosController extends Controller
         foreach ($raw as $key => $value) {
             if (is_array($value)) {
                 $method = (string) ($value['method'] ?? '');
-                $amount = (int) round((float) ($value['amount'] ?? 0));
+                $amount = Money::round((float) ($value['amount'] ?? 0));
             } else {
                 $method = (string) $key;
-                $amount = (int) round((float) $value);
+                $amount = Money::round((float) $value);
             }
             if ($amount > 0) {
                 $rows[] = ['method' => $method, 'amount' => $amount];
@@ -140,9 +141,9 @@ class PosController extends Controller
 
     /**
      * @param  array<int, array{product_id:int|string, qty:int|float|string}>  $lines
-     * @return array<int, array{product_id:int, qty:float, discount_amount?:int}>
+     * @return array<int, array{product_id:int, qty:float, discount_amount?:float}>
      */
-    private function lines(array $lines, int $cartDiscount): array
+    private function lines(array $lines, float $cartDiscount): array
     {
         $out = collect($lines)->map(fn ($l) => [
             'product_id' => (int) $l['product_id'],
@@ -167,17 +168,19 @@ class PosController extends Controller
             if ($product === null) {
                 throw new \InvalidArgumentException('Line '.($i + 1).": product #{$line['product_id']} not found in this shop.");
             }
-            $gross = (int) round($line['qty'] * (int) $product->unit_sale_price);
-            $discount = (int) round($line['qty'] * (int) $product->unit_discount);
+            $gross = Money::round($line['qty'] * (float) $product->unit_sale_price);
+            $discount = Money::round($line['qty'] * (float) $product->unit_discount);
             $batchSize = (float) $product->batch_size;
-            if ($batchSize > 0 && (int) $product->batch_discount > 0) {
-                $discount += (int) floor($line['qty'] / $batchSize + 1e-9) * (int) $product->batch_discount;
+            if ($batchSize > 0 && (float) $product->batch_discount > 0) {
+                $discount = Money::round(
+                    $discount + floor($line['qty'] / $batchSize + 1e-9) * (float) $product->batch_discount
+                );
             }
             $base[$i] = min($discount, $gross);
-            $net[$i] = $gross - $base[$i];
+            $net[$i] = Money::round($gross - $base[$i]);
         }
 
-        $totalNet = array_sum($net);
+        $totalNet = Money::round(array_sum($net));
         if ($cartDiscount > $totalNet) {
             throw new \InvalidArgumentException('Cart discount cannot exceed the sale amount.');
         }
@@ -187,19 +190,19 @@ class PosController extends Controller
         foreach ($out as $i => $line) {
             $share = $i === $last
                 ? $left
-                : min($net[$i], (int) floor($cartDiscount * $net[$i] / max(1, $totalNet)));
+                : Money::round(min($net[$i], $cartDiscount * $net[$i] / max(0.01, $totalNet)));
             $share = min($share, $net[$i]);
-            $left -= $share;
-            $out[$i]['discount_amount'] = $base[$i] + $share;
+            $left = Money::round($left - $share);
+            $out[$i]['discount_amount'] = Money::round($base[$i] + $share);
         }
 
         if ($left > 0) {
             // Rounding/caps left a remainder: push it onto lines that still have headroom.
             foreach ($out as $i => $line) {
-                $room = $net[$i] - ($out[$i]['discount_amount'] - $base[$i]);
-                $take = min($room, $left);
-                $out[$i]['discount_amount'] += $take;
-                $left -= $take;
+                $room = Money::round($net[$i] - ($out[$i]['discount_amount'] - $base[$i]));
+                $take = Money::round(min($room, $left));
+                $out[$i]['discount_amount'] = Money::round($out[$i]['discount_amount'] + $take);
+                $left = Money::round($left - $take);
                 if ($left <= 0) {
                     break;
                 }

@@ -22,9 +22,9 @@
                     @foreach ($vendors as $row)
                         <tr class="border-b border-line last:border-0">
                             <td class="px-4 py-3">{{ $row->name }}</td>
-                            <td class="px-4 py-3">{{ $row->unpaid }}</td>
-                            <td class="px-4 py-3">{{ $row->unallocated_credit }}</td>
-                            <td class="px-4 py-3">{{ $row->owed }}</td>
+                            <td class="px-4 py-3 tabular-nums">{{ \App\Support\Money::format($row->unpaid) }}</td>
+                            <td class="px-4 py-3 tabular-nums">{{ \App\Support\Money::format($row->unallocated_credit) }}</td>
+                            <td class="px-4 py-3 tabular-nums">{{ \App\Support\Money::format($row->owed) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

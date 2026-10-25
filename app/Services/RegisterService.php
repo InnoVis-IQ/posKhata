@@ -10,10 +10,11 @@ use App\Models\Sale;
 use App\Models\SalePayment;
 use App\Models\SaleRefundPayment;
 use App\Models\VendorPayment;
+use App\Support\Money;
 use App\Support\PosContext;
 use Illuminate\Support\Facades\DB;
 
-/** All money amounts are integer minor units. */
+/** All money amounts are major currency units (PKR). */
 class RegisterService
 {
     public const STATUS_OPEN = 'open';
@@ -46,7 +47,7 @@ class RegisterService
 
     public function open(int|float $openingFloat): RegisterSession
     {
-        $float = (int) round($openingFloat);
+        $float = Money::round($openingFloat);
         if ($float < 0) {
             throw new \InvalidArgumentException('Opening float cannot be negative.');
         }
@@ -81,7 +82,7 @@ class RegisterService
     /** Closes $session (default: the branch's open session) and stores expected/counted/variance. */
     public function close(int|float $countedCash, ?RegisterSession $session = null): RegisterSession
     {
-        $counted = (int) round($countedCash);
+        $counted = Money::round($countedCash);
         if ($counted < 0) {
             throw new \InvalidArgumentException('Counted cash cannot be negative.');
         }
@@ -104,7 +105,7 @@ class RegisterService
                 'closed_at' => now(),
                 'expected_cash' => $expected,
                 'counted_cash' => $counted,
-                'variance' => $counted - $expected,
+                'variance' => Money::round($counted - $expected),
             ]);
 
             return $locked->refresh();
@@ -158,7 +159,7 @@ class RegisterService
             throw new \InvalidArgumentException("Reason must be one of: ".implode('|', self::REASONS).'.');
         }
 
-        $amount = (int) round($amount);
+        $amount = Money::round($amount);
         if ($amount <= 0) {
             throw new \InvalidArgumentException('Movement amount must be greater than zero.');
         }
@@ -193,36 +194,38 @@ class RegisterService
      *          - cash sale refund payments (session)
      *          + cash movements in - out
      */
-    public function expectedCash(RegisterSession $session): int
+    public function expectedCash(RegisterSession $session): float
     {
         $id = $session->id;
 
-        $salesCash = (int) SalePayment::query()
+        $salesCash = Money::round(SalePayment::query()
             ->where('method', 'cash')
             ->whereIn('sale_id', Sale::query()->where('register_session_id', $id)->select('id'))
-            ->sum('amount');
+            ->sum('amount'));
 
-        $khaataCash = (int) KhaataPayment::query()
-            ->where('register_session_id', $id)->where('method', 'cash')->sum('amount');
+        $khaataCash = Money::round(KhaataPayment::query()
+            ->where('register_session_id', $id)->where('method', 'cash')->sum('amount'));
 
-        $vendorCash = (int) VendorPayment::query()
-            ->where('register_session_id', $id)->where('method', 'cash')->sum('amount');
+        $vendorCash = Money::round(VendorPayment::query()
+            ->where('register_session_id', $id)->where('method', 'cash')->sum('amount'));
 
-        $refundCash = (int) SaleRefundPayment::query()
-            ->where('register_session_id', $id)->where('method', 'cash')->sum('amount');
+        $refundCash = Money::round(SaleRefundPayment::query()
+            ->where('register_session_id', $id)->where('method', 'cash')->sum('amount'));
 
-        $in = (int) RegisterCashMovement::query()
-            ->where('register_session_id', $id)->where('direction', 'in')->sum('amount');
-        $out = (int) RegisterCashMovement::query()
-            ->where('register_session_id', $id)->where('direction', 'out')->sum('amount');
+        $in = Money::round(RegisterCashMovement::query()
+            ->where('register_session_id', $id)->where('direction', 'in')->sum('amount'));
+        $out = Money::round(RegisterCashMovement::query()
+            ->where('register_session_id', $id)->where('direction', 'out')->sum('amount'));
 
-        return (int) $session->opening_float
+        return Money::round(
+            (float) $session->opening_float
             + $salesCash
             + $khaataCash
             - $vendorCash
             - $refundCash
             + $in
-            - $out;
+            - $out
+        );
     }
 
     private function lockedSession(RegisterSession $session): RegisterSession
