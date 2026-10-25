@@ -3,7 +3,10 @@
 @section('title', 'Login')
 
 @section('content')
-    <h2 class="mb-1 text-xl font-semibold">Sign in</h2>
+    <h2 class="mb-1 flex items-center gap-1.5 text-xl font-semibold">
+        Sign in
+        <x-info>Enter the username and password your shop gave you to open the system.</x-info>
+    </h2>
     <p class="mb-6 text-sm text-muted">Use your username and password.</p>
 
     <form method="POST" action="{{ route('login.attempt') }}" class="space-y-4">

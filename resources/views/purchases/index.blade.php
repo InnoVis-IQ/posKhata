@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Purchases')
+@section('info', 'Bills from suppliers for goods you ordered.')
 
 @section('content')
     <div class="mb-4 flex flex-wrap justify-end gap-2">

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Branches')
+@section('info', 'Shop locations. Switch between them from the top bar.')
 
 @section('content')
     <div class="mb-4 flex justify-end">

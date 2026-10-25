@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Shop settings')
+@section('info', 'Shop name, receipts, currency, tax, and other store-wide options.')
 
 @section('content')
     <form method="POST" action="{{ route('settings.update') }}" enctype="multipart/form-data" class="mx-auto max-w-2xl space-y-4 rounded-xl border border-line bg-panel p-6">
@@ -36,8 +37,10 @@
                 <textarea id="receipt_footer" name="receipt_footer" rows="2" class="w-full rounded-lg border border-line px-3 py-2 text-sm">{{ old('receipt_footer', $shop->receipt_footer) }}</textarea>
             </div>
             <div class="md:col-span-2 border-t border-line pt-4">
-                <p class="text-sm font-semibold">Currency &amp; tax</p>
-                <p class="mt-1 text-xs text-muted">Tax is shop-wide. Product unit sale prices are tax-inclusive using this rate.</p>
+                <p class="flex items-center gap-1.5 text-sm font-semibold">
+                    Currency &amp; tax
+                    <x-info>Tax applies to the whole shop. Product prices already include this tax rate.</x-info>
+                </p>
             </div>
             <div>
                 <label class="mb-1 block text-sm font-medium" for="currency_code">Currency</label>

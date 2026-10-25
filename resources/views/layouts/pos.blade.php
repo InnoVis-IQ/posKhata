@@ -12,7 +12,10 @@
 <body class="min-h-screen bg-ink text-white">
     <header class="flex items-center justify-between border-b border-white/10 px-4 py-3">
         <div>
-            <p class="text-lg font-semibold">{{ $shop->name }} · POS</p>
+            <div class="flex items-center gap-2">
+                <p class="text-lg font-semibold">{{ $shop->name }} · POS</p>
+                <x-info dark>Tap products to sell. Take cash, card, or khaata payment in the cart.</x-info>
+            </div>
             <p class="text-xs text-white/60">{{ $currentBranch->name }} · {{ $viewer->name }}</p>
         </div>
         <div class="flex gap-2">

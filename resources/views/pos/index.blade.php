@@ -22,6 +22,10 @@
         @pos-add-customer.window="openCustomerModal()"
     >
         <section class="lg:col-span-3 space-y-3">
+            <div class="flex items-center gap-2">
+                <p class="text-sm font-medium text-white/80">Products</p>
+                <x-info dark>Find an item by name, code, or barcode, then tap it to add to the cart.</x-info>
+            </div>
             <input type="search" x-model="query" placeholder="Search name, SKU, barcode…" class="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm placeholder:text-white/40">
             <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                 <template x-for="product in filtered" :key="product.id">
@@ -37,7 +41,7 @@
 
         <section class="lg:col-span-2 rounded-2xl border border-white/10 bg-white text-ink shadow-xl">
             <div class="border-b border-line px-4 py-3">
-                <h2 class="font-semibold">Cart</h2>
+                <h2 class="flex items-center gap-1.5 font-semibold">Cart <x-info>Items being sold now. Set quantities, choose how the customer pays, then complete the sale.</x-info></h2>
             </div>
             <div class="max-h-64 space-y-2 overflow-y-auto px-4 py-3">
                 <template x-if="cart.length === 0">
@@ -130,8 +134,10 @@
                 class="w-full max-w-md rounded-2xl border border-line bg-panel p-6 text-ink shadow-xl"
                 @click.outside="closeCustomerModal()"
             >
-                <h3 class="text-lg font-semibold">Add customer</h3>
-                <p class="mt-1 text-sm text-muted">Cart stays open. Customer is attached to this sale.</p>
+                <h3 class="flex items-center gap-1.5 text-lg font-semibold">
+                    Add customer
+                    <x-info>Save a customer for this sale (needed for khaata). Your cart stays open.</x-info>
+                </h3>
                 <form class="mt-4 space-y-3" @submit.prevent="applyCustomerModal()">
                     <div>
                         <label class="mb-1 block text-sm font-medium" for="modal_customer_name">Name</label>

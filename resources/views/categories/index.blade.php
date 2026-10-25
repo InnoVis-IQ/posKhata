@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Categories')
+@section('info', 'Groups for products — for example snacks, drinks, or cleaning.')
 
 @section('content')
     <div class="mb-4 flex justify-end">

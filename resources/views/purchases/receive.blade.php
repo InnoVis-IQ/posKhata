@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Receive '.$invoice->invoice_number)
+@section('info', 'Mark goods as arrived so they are added to your stock.')
 
 @section('content')
     <form method="POST" action="{{ route('purchases.receive.store', $invoice->id) }}" class="mx-auto max-w-2xl space-y-4 rounded-xl border border-line bg-panel p-6">

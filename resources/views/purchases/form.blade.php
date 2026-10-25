@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'New purchase invoice')
+@section('info', 'Create a supplier bill for goods you are buying.')
 
 @section('content')
     <form method="POST" action="{{ route('purchases.store') }}" class="mx-auto max-w-3xl space-y-4 rounded-xl border border-line bg-panel p-6" x-data="{ lines: [{ product_id: '', qty: '', unit_cost: '' }] }">

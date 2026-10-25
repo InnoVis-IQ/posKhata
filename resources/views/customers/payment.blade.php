@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Khaata payment · '.$customer->name)
+@section('info', 'Record money this customer paid toward what they owe.')
 
 @section('content')
     <form method="POST" action="{{ route('customers.payment.store', $customer->id) }}" class="mx-auto max-w-xl space-y-4 rounded-xl border border-line bg-panel p-6">

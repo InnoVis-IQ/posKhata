@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $unit ? 'Edit unit' : 'Add unit')
+@section('info', 'Add a unit of measure used on products.')
 
 @section('content')
     <form method="POST" action="{{ $unit ? route('units.update', $unit->id) : route('units.store') }}" class="mx-auto max-w-xl space-y-4 rounded-xl border border-line bg-panel p-6">

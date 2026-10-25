@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Stock adjustments')
+@section('info', 'Fix stock when counts don’t match — damage, loss, or found goods.')
 
 @section('content')
     <form method="POST" action="{{ route('stock.adjustments.store') }}" class="mx-auto max-w-xl space-y-4 rounded-xl border border-line bg-panel p-6">

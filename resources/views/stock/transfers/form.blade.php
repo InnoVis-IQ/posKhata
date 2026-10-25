@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'New transfer')
+@section('info', 'Send items from this branch to another shop location.')
 
 @section('content')
     <form method="POST" action="{{ route('stock.transfers.store') }}" class="mx-auto max-w-xl space-y-4 rounded-xl border border-line bg-panel p-6" x-data="{ lines: [{ product_id: '', qty: '' }] }">

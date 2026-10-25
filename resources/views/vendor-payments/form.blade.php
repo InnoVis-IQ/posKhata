@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Vendor payment')
+@section('info', 'Record money you paid a supplier.')
 
 @section('content')
     <form method="POST" action="{{ route('vendor-payments.store') }}" class="mx-auto max-w-2xl space-y-4 rounded-xl border border-line bg-panel p-6" x-data="{ manual: false, allocations: [{ purchase_invoice_id: '', amount: '' }] }">

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Low stock')
+@section('info', 'Items that are running low and may need a reorder soon.')
 
 @section('content')
     <p class="mb-4 text-sm text-muted">Products where derived branch qty ≤ reorder level.</p>

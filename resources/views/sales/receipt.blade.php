@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Receipt '.$sale->sale_number)
+@section('info', 'Proof of this sale. You can print it for the customer.')
 
 @section('content')
     <div class="mx-auto max-w-md rounded-xl border border-line bg-panel p-6 print:border-0 print:shadow-none">

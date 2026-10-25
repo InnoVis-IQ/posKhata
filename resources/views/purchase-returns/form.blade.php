@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Purchase return')
+@section('info', 'Send goods back to a supplier and reduce what you owe.')
 
 @section('content')
     <form method="POST" action="{{ route('purchase-returns.store') }}" class="mx-auto max-w-2xl space-y-4 rounded-xl border border-line bg-panel p-6" x-data="{ lines: [{ product_id: '', qty: '', unit_cost: '' }] }">

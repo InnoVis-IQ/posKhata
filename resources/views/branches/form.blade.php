@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $branch ? 'Edit branch' : 'Add branch')
+@section('info', 'Add or edit a shop location.')
 
 @section('content')
     <form method="POST" action="{{ $branch ? route('branches.update', $branch->id) : route('branches.store') }}" class="mx-auto max-w-xl space-y-4 rounded-xl border border-line bg-panel p-6">

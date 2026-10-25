@@ -1,13 +1,17 @@
 @extends('layouts.app')
 
 @section('title', 'Refunds & voids')
+@section('info', 'Review requests to cancel a sale or give money back.')
 
 @section('content')
     <div class="mb-4 flex justify-end">
         <a href="{{ route('refunds.create') }}" class="rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-accent-hover">New request</a>
     </div>
 
-    <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-muted">Pending approval</h2>
+    <h2 class="mb-2 flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted">
+        Pending approval
+        <x-info>These need an admin to say yes or no before money or stock changes.</x-info>
+    </h2>
     @if ($pending->isEmpty())
         @include('components.empty', ['message' => 'No pending refunds or voids.'])
     @else

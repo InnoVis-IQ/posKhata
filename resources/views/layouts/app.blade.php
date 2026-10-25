@@ -14,6 +14,7 @@
         $role = $viewer->role;
         $isAdmin = in_array($role, ['admin', 'superadmin'], true);
         $isSuper = $role === 'superadmin';
+        $routeIs = fn (string ...$patterns) => request()->routeIs(...$patterns);
     @endphp
 
     <div class="flex min-h-screen">
@@ -31,38 +32,78 @@
                 <a href="{{ route('customers.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Customers / Khaata</a>
 
                 @if ($isAdmin)
-                    <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-muted">Catalog</p>
-                    <a href="{{ route('categories.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Categories</a>
-                    <a href="{{ route('products.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Products</a>
-                    <a href="{{ route('products.low-stock') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Low stock</a>
+                    @php $catalogOpen = $routeIs('categories.*', 'products.*'); @endphp
+                    <div x-data="{ open: {{ $catalogOpen ? 'true' : 'false' }} }" class="pt-2">
+                        <button type="button" @click="open = !open" class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted hover:bg-surface">
+                            <span>Catalog</span>
+                            <svg class="h-3.5 w-3.5 transition-transform" :class="open && 'rotate-180'" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-0.5 space-y-0.5">
+                            <a href="{{ route('categories.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Categories</a>
+                            <a href="{{ route('products.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Products</a>
+                            <a href="{{ route('products.low-stock') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Low stock</a>
+                        </div>
+                    </div>
 
-                    <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-muted">Stock</p>
-                    <a href="{{ route('stock.opening') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Opening stock</a>
-                    <a href="{{ route('stock.adjustments') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Adjustments</a>
-                    <a href="{{ route('stock.transfers.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Transfers</a>
+                    @php $stockOpen = $routeIs('stock.*'); @endphp
+                    <div x-data="{ open: {{ $stockOpen ? 'true' : 'false' }} }">
+                        <button type="button" @click="open = !open" class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted hover:bg-surface">
+                            <span>Stock</span>
+                            <svg class="h-3.5 w-3.5 transition-transform" :class="open && 'rotate-180'" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-0.5 space-y-0.5">
+                            <a href="{{ route('stock.opening') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Opening stock</a>
+                            <a href="{{ route('stock.adjustments') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Adjustments</a>
+                            <a href="{{ route('stock.transfers.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Transfers</a>
+                        </div>
+                    </div>
 
-                    <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-muted">Purchasing</p>
-                    <a href="{{ route('vendors.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Vendors</a>
-                    <a href="{{ route('purchases.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Purchases</a>
-                    <a href="{{ route('purchase-returns.create') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Purchase return</a>
-                    <a href="{{ route('vendor-payments.create') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Vendor payment</a>
+                    @php $purchasingOpen = $routeIs('vendors.*', 'purchases.*', 'purchase-returns.*', 'vendor-payments.*'); @endphp
+                    <div x-data="{ open: {{ $purchasingOpen ? 'true' : 'false' }} }">
+                        <button type="button" @click="open = !open" class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted hover:bg-surface">
+                            <span>Purchasing</span>
+                            <svg class="h-3.5 w-3.5 transition-transform" :class="open && 'rotate-180'" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-0.5 space-y-0.5">
+                            <a href="{{ route('vendors.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Vendors</a>
+                            <a href="{{ route('purchases.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Purchases</a>
+                            <a href="{{ route('purchase-returns.create') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Purchase return</a>
+                            <a href="{{ route('vendor-payments.create') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Vendor payment</a>
+                        </div>
+                    </div>
 
-                    <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-muted">Admin</p>
-                    <a href="{{ route('users.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Users</a>
-                    <a href="{{ route('refunds.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Refunds / voids</a>
-                    <a href="{{ route('settings.edit') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Settings</a>
-                    <a href="{{ route('reports.day-sales') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Day sales</a>
-                    <a href="{{ route('reports.payables') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Payables</a>
-                    <a href="{{ route('logs.stock') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Stock log</a>
-                    <a href="{{ route('logs.payments') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Payment log</a>
+                    @php $adminOpen = $routeIs('users.*', 'refunds.*', 'settings.*', 'reports.*', 'logs.*'); @endphp
+                    <div x-data="{ open: {{ $adminOpen ? 'true' : 'false' }} }">
+                        <button type="button" @click="open = !open" class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted hover:bg-surface">
+                            <span>Admin</span>
+                            <svg class="h-3.5 w-3.5 transition-transform" :class="open && 'rotate-180'" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-0.5 space-y-0.5">
+                            <a href="{{ route('users.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Users</a>
+                            <a href="{{ route('refunds.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Refunds / voids</a>
+                            <a href="{{ route('settings.edit') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Settings</a>
+                            <a href="{{ route('reports.day-sales') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Day sales</a>
+                            <a href="{{ route('reports.payables') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Payables</a>
+                            <a href="{{ route('logs.stock') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Stock log</a>
+                            <a href="{{ route('logs.payments') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Payment log</a>
+                        </div>
+                    </div>
                 @else
                     <a href="{{ route('refunds.create') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Request refund</a>
                 @endif
 
                 @if ($isSuper)
-                    <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-muted">Superadmin</p>
-                    <a href="{{ route('branches.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Branches</a>
-                    <a href="{{ route('units.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Units</a>
+                    @php $superOpen = $routeIs('branches.*', 'units.*'); @endphp
+                    <div x-data="{ open: {{ $superOpen ? 'true' : 'false' }} }">
+                        <button type="button" @click="open = !open" class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted hover:bg-surface">
+                            <span>Superadmin</span>
+                            <svg class="h-3.5 w-3.5 transition-transform" :class="open && 'rotate-180'" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-0.5 space-y-0.5">
+                            <a href="{{ route('branches.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Branches</a>
+                            <a href="{{ route('units.index') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Units</a>
+                        </div>
+                    </div>
                 @endif
             </nav>
         </aside>
@@ -70,7 +111,12 @@
         <div class="flex min-w-0 flex-1 flex-col">
             <header class="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-panel px-4 py-3">
                 <div class="min-w-0">
-                    <h1 class="truncate text-lg font-semibold">@yield('title', 'Dashboard')</h1>
+                    <div class="flex min-w-0 items-center gap-2">
+                        <h1 class="truncate text-lg font-semibold">@yield('title', 'Dashboard')</h1>
+                        @hasSection('info')
+                            <x-info class="shrink-0">@yield('info')</x-info>
+                        @endif
+                    </div>
                     <p class="text-xs text-muted">{{ $currentBranch->name }} · {{ $viewer->name }} ({{ $viewer->role }})</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">

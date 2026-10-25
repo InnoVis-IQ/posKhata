@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Units')
+@section('info', 'How products are measured — pieces, kg, litres, and so on.')
 
 @section('content')
     <p class="mb-4 text-sm text-muted">Product units — managed by superadmin only.</p>

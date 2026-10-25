@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Vendors')
+@section('info', 'Your suppliers — the people you buy stock from.')
 
 @section('content')
     <div class="mb-4 flex justify-end">

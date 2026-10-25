@@ -1,11 +1,12 @@
 @extends('layouts.app')
 
 @section('title', 'Cash register')
+@section('info', 'Your cash drawer for the day. Open it before selling, then close it when the day ends.')
 
 @section('content')
     <div class="grid gap-6 lg:grid-cols-2">
         <section class="space-y-4 rounded-xl border border-line bg-panel p-6">
-            <h2 class="font-semibold">Session</h2>
+            <h2 class="flex items-center gap-1.5 font-semibold">Session <x-info>Start the day by opening the register with the cash already in the drawer.</x-info></h2>
             @if ($session)
                 <p class="text-sm text-muted">Open since {{ $session->opened_at }} · float {{ $session->opening_float }}</p>
             @else
@@ -30,8 +31,7 @@
         </section>
 
         <section class="space-y-4 rounded-xl border border-line bg-panel p-6">
-            <h2 class="font-semibold">Cash in / out</h2>
-            <p class="text-xs text-muted">Only expense, float adjust, and other — sales/khaata/vendor cash come from payment tables.</p>
+            <h2 class="flex items-center gap-1.5 font-semibold">Cash in / out <x-info>Record cash you add or remove by hand (expenses or float fixes). Sales and supplier payments are logged automatically.</x-info></h2>
             <form method="POST" action="{{ route('register.movement') }}" class="space-y-3">
                 @csrf
                 <div class="grid gap-3 md:grid-cols-2">
@@ -64,8 +64,7 @@
         </section>
 
         <section class="space-y-4 rounded-xl border border-line bg-panel p-6 lg:col-span-2">
-            <h2 class="font-semibold">Close register</h2>
-            <p class="text-sm text-muted">Expected cash is derived from float + cash payments − cash payouts ± movements.</p>
+            <h2 class="flex items-center gap-1.5 font-semibold">Close register <x-info>Count the cash in the drawer and close the day. The system shows how much should be there.</x-info></h2>
             <form method="POST" action="{{ route('register.close') }}" class="flex flex-wrap items-end gap-3">
                 @csrf
                 <div>

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $category ? 'Edit category' : 'Add category')
+@section('info', 'Name a product group so items are easier to find.')
 
 @section('content')
     <form method="POST" action="{{ $category ? route('categories.update', $category->id) : route('categories.store') }}" class="mx-auto max-w-xl space-y-4 rounded-xl border border-line bg-panel p-6">

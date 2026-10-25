@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $user ? 'Edit user' : 'Add user')
+@section('info', 'Create or change a staff account and their role.')
 
 @section('content')
     <form method="POST" action="{{ $user ? route('users.update', $user->id) : route('users.store') }}" class="mx-auto max-w-xl space-y-4 rounded-xl border border-line bg-panel p-6">

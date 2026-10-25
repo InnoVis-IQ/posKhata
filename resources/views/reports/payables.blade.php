@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Vendor payables')
+@section('info', 'How much you still owe each supplier.')
 
 @section('content')
     <p class="mb-4 text-sm text-muted">Owed = unpaid invoice remainders − unallocated vendor credit.</p>

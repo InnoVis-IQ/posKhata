@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Khaata · '.$customer->name)
+@section('info', 'How much this customer owes, and every credit sale or payment on their account.')
 
 @section('content')
     @if ($overWarning)

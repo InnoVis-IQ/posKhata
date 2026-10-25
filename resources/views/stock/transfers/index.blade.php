@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Stock transfers')
+@section('info', 'Move stock from one branch to another.')
 
 @section('content')
     <div class="mb-4 flex justify-end">

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Users')
+@section('info', 'Staff logins and what each person is allowed to do.')
 
 @section('content')
     <div class="mb-4 flex justify-end">

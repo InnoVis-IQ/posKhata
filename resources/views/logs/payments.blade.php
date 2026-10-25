@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Payment log')
+@section('info', 'A history of money paid in or out — sales, khaata, and suppliers.')
 
 @section('content')
     <div class="mb-4 flex flex-wrap gap-2 text-sm">
@@ -8,6 +9,10 @@
         <a href="{{ route('logs.payments') }}" class="rounded-lg bg-accent px-3 py-1.5 font-medium text-white">Payments in/out</a>
     </div>
 
+    <div class="mb-2 flex items-center gap-1.5">
+        <p class="text-sm font-medium">Filters</p>
+        <x-info>Narrow the list by date, in or out, payment type, or branch.</x-info>
+    </div>
     <form method="GET" class="mb-4 flex flex-wrap items-end gap-3">
         <div>
             <label class="mb-1 block text-sm font-medium" for="date_from">From</label>

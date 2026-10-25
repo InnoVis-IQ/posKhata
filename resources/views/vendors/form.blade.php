@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $vendor ? 'Edit vendor' : 'Add vendor')
+@section('info', 'Add or update a supplier’s details.')
 
 @section('content')
     <form method="POST" action="{{ $vendor ? route('vendors.update', $vendor->id) : route('vendors.store') }}" class="mx-auto max-w-xl space-y-4 rounded-xl border border-line bg-panel p-6">

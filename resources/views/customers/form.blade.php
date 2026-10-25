@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $customer ? 'Edit customer' : 'Add customer')
+@section('info', 'Save a customer’s name and phone so you can track their credit later.')
 
 @section('content')
     <form method="POST" action="{{ $customer ? route('customers.update', $customer->id) : route('customers.store') }}" class="mx-auto max-w-xl space-y-4 rounded-xl border border-line bg-panel p-6">

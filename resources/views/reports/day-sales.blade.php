@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Day sales')
+@section('info', 'See how much you sold on a chosen day.')
 
 @section('content')
     <form method="GET" class="mb-4 flex flex-wrap items-end gap-3">

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $product ? 'Edit product' : 'Add product')
+@section('info', 'Set up one item: name, codes, price, and stock alert level.')
 
 @section('content')
     @php
@@ -87,7 +88,11 @@
             </div>
 
             <div class="md:col-span-2 border-t border-line pt-4">
-                <p class="text-sm font-semibold">Pricing <span class="font-normal text-muted">(amounts in minor currency units)</span></p>
+                <p class="flex items-center gap-1.5 text-sm font-semibold">
+                    Pricing
+                    <x-info>Cost, selling price, tax, and discount. Final price is what the customer pays per unit.</x-info>
+                    <span class="font-normal text-muted">(amounts in minor currency units)</span>
+                </p>
             </div>
 
             <div>
@@ -138,8 +143,10 @@
             </div>
 
             <div class="md:col-span-2 border-t border-line pt-4">
-                <p class="text-sm font-semibold">Batch deal</p>
-                <p class="mt-1 text-xs text-muted">If batch size is 12 and batch discount is 20, buying 12 units applies 20 off that batch (24 units → 40 off). Leave batch size 0 for no deal.</p>
+                <p class="flex items-center gap-1.5 text-sm font-semibold">
+                    Batch deal
+                    <x-info>Optional bulk discount. Example: buy 12, get 20 off. Leave batch size 0 if you don’t use deals.</x-info>
+                </p>
             </div>
             <div>
                 <label class="mb-1 block text-sm font-medium" for="batch_size">Batch size</label>

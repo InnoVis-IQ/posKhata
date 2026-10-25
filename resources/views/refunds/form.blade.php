@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Request refund / void')
+@section('info', 'Ask to cancel a sale or return money. An admin must approve it.')
 
 @section('content')
     @unless ($registerOpen)

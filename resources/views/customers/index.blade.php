@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Customers')
+@section('info', 'People on file — especially those who buy on credit (khaata).')
 
 @section('content')
     <div class="mb-4 flex justify-end">

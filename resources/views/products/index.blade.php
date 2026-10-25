@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Products')
+@section('info', 'Everything you sell — names, prices, and when to reorder.')
 
 @section('content')
     <div class="mb-4 flex flex-wrap justify-end gap-2">
