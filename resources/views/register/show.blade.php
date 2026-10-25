@@ -65,7 +65,7 @@
 
         <section class="space-y-4 rounded-xl border border-line bg-panel p-6 lg:col-span-2">
             <h2 class="font-semibold">Close register</h2>
-            <p class="text-sm text-muted">Expected cash is derived in Tier 3 from float + cash payments − cash payouts ± movements.</p>
+            <p class="text-sm text-muted">Expected cash is derived from float + cash payments − cash payouts ± movements.</p>
             <form method="POST" action="{{ route('register.close') }}" class="flex flex-wrap items-end gap-3">
                 @csrf
                 <div>

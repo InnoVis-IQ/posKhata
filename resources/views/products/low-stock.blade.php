@@ -3,7 +3,7 @@
 @section('title', 'Low stock')
 
 @section('content')
-    <p class="mb-4 text-sm text-muted">Products where derived branch qty ≤ reorder level (computed in Tier 3).</p>
+    <p class="mb-4 text-sm text-muted">Products where derived branch qty ≤ reorder level.</p>
     @if ($products->isEmpty())
         @include('components.empty', ['message' => 'No low-stock items to show.'])
     @else

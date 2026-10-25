@@ -131,7 +131,7 @@
                 @click.outside="closeCustomerModal()"
             >
                 <h3 class="text-lg font-semibold">Add customer</h3>
-                <p class="mt-1 text-sm text-muted">Cart stays open. Customer is attached to this sale; Tier 3 will persist them.</p>
+                <p class="mt-1 text-sm text-muted">Cart stays open. Customer is attached to this sale.</p>
                 <form class="mt-4 space-y-3" @submit.prevent="applyCustomerModal()">
                     <div>
                         <label class="mb-1 block text-sm font-medium" for="modal_customer_name">Name</label>

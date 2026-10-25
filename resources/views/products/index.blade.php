@@ -8,7 +8,7 @@
         <a href="{{ route('products.create') }}" class="rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-accent-hover">Add product</a>
     </div>
     @if ($products->isEmpty())
-        @include('components.empty', ['message' => 'No products yet. Quantity is derived from the stock ledger in Tier 3.'])
+        @include('components.empty', ['message' => 'No products yet.'])
     @else
         <div class="overflow-x-auto rounded-xl border border-line bg-panel">
             <table class="min-w-full text-left text-sm">

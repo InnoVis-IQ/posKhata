@@ -7,7 +7,7 @@
         @csrf
         <p class="text-sm text-muted">Vendor: {{ $invoice->vendor_name }}. Receiving updates stock ledger and last unit cost.</p>
         @if ($invoice->lines->isEmpty())
-            @include('components.empty', ['message' => 'No invoice lines loaded (Tier 3).'])
+            @include('components.empty', ['message' => 'No invoice lines loaded.'])
         @else
             <div class="space-y-3">
                 @foreach ($invoice->lines as $i => $line)

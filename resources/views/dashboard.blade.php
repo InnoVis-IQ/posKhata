@@ -17,5 +17,4 @@
             <p class="mt-1 text-xl font-semibold">Customers / Khaata</p>
         </a>
     </div>
-    <p class="mt-6 text-sm text-muted">UI shells only — data and posting land in Tier 3.</p>
 @endsection

@@ -3,7 +3,7 @@
 @section('title', 'Vendor payables')
 
 @section('content')
-    <p class="mb-4 text-sm text-muted">Owed = unpaid invoice remainders − unallocated vendor credit (derived in Tier 3).</p>
+    <p class="mb-4 text-sm text-muted">Owed = unpaid invoice remainders − unallocated vendor credit.</p>
     @if ($vendors->isEmpty())
         @include('components.empty', ['message' => 'No payable rows to show.'])
     @else

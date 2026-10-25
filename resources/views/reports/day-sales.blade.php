@@ -11,7 +11,7 @@
         <button type="submit" class="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-hover">Show</button>
     </form>
     @if ($sales->isEmpty())
-        @include('components.empty', ['message' => 'No sales for this date (Tier 3 will load live data).'])
+        @include('components.empty', ['message' => 'No sales for this date.'])
     @else
         <div class="overflow-x-auto rounded-xl border border-line bg-panel">
             <table class="min-w-full text-left text-sm">

@@ -5,7 +5,7 @@
 @section('content')
     <form method="POST" action="{{ route('customers.payment.store', $customer->id) }}" class="mx-auto max-w-xl space-y-4 rounded-xl border border-line bg-panel p-6">
         @csrf
-        <p class="text-sm text-muted">Current balance: {{ $customer->balance }} (minor units). Writes <code>khaata_payments</code> + ledger <code>payment</code> entry in Tier 3.</p>
+        <p class="text-sm text-muted">Current balance: {{ $customer->balance }} (minor units).</p>
         <div>
             <label class="mb-1 block text-sm font-medium" for="amount">Amount</label>
             <input id="amount" name="amount" type="number" required class="w-full rounded-lg border border-line px-3 py-2 text-sm">
