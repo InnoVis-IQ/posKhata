@@ -9,6 +9,7 @@ use App\Models\SaleLine;
 use App\Support\PosContext;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -18,36 +19,18 @@ class DashboardController extends Controller
         $shopId = PosContext::shopId();
         $branchId = PosContext::branchId();
         $shop = PosContext::shop();
-        $weekStart = now()->subDays(7)->startOfDay();
-        $today = now()->toDateString();
-
-        $weekSales = Sale::query()
-            ->where('shop_id', $shopId)
-            ->where('branch_id', $branchId)
-            ->where('sold_at', '>=', $weekStart)
-            ->where('status', '!=', 'void')
-            ->selectRaw('coalesce(sum(total), 0) as amount, count(*) as sale_count')
-            ->first();
-
-        $todaySalesAmount = (int) Sale::query()
-            ->where('shop_id', $shopId)
-            ->where('branch_id', $branchId)
-            ->whereDate('sold_at', $today)
-            ->where('status', '!=', 'void')
-            ->sum('total');
+        $days30 = now()->subDays(30)->startOfDay();
+        $yearStart = now()->subYear()->startOfDay();
 
         $lowStock = $this->lowStock($shopId, $branchId);
         $creditAlerts = $this->creditAlerts($shopId, (int) ($shop->default_khaata_warning_amount ?? 0));
 
         return view('dashboard', [
-            'weekSalesAmount' => (int) ($weekSales->amount ?? 0),
-            'weekSaleCount' => (int) ($weekSales->sale_count ?? 0),
-            'todaySalesAmount' => $todaySalesAmount,
-            'lowStockCount' => $lowStock->count(),
-            'lowStock' => $lowStock->take(8),
-            'creditAlertCount' => $creditAlerts->count(),
-            'creditAlerts' => $creditAlerts->take(8),
-            'topSellers' => $this->topSellers($shopId, $branchId, $weekStart),
+            'lowStock' => $lowStock->take(10),
+            'creditAlerts' => $creditAlerts->take(10),
+            'weekDailySales' => $this->weekDailySales($shopId, $branchId),
+            'topSellers' => $this->topSellers($shopId, $branchId, $days30),
+            'valuedCustomers' => $this->valuedCustomers($shopId, $branchId, $days30, $yearStart),
         ]);
     }
 
@@ -99,22 +82,101 @@ class DashboardController extends Controller
             ->values();
     }
 
-    /** Top 5 products by qty sold at this branch over the past 7 days. */
-    private function topSellers(int $shopId, int $branchId, CarbonInterface $weekStart): Collection
+    /** Daily sales totals for the past 7 days (including today), voids excluded. */
+    private function weekDailySales(int $shopId, int $branchId): Collection
+    {
+        $start = now()->subDays(6)->startOfDay();
+
+        $byDay = Sale::query()
+            ->where('shop_id', $shopId)
+            ->where('branch_id', $branchId)
+            ->where('sold_at', '>=', $start)
+            ->where('status', '!=', 'void')
+            ->selectRaw('date(sold_at) as day, coalesce(sum(total), 0) as amount')
+            ->groupBy(DB::raw('date(sold_at)'))
+            ->pluck('amount', 'day');
+
+        return collect(range(0, 6))->map(function (int $i) use ($start, $byDay) {
+            $day = $start->copy()->addDays($i);
+
+            return (object) [
+                'date' => $day->toDateString(),
+                'label' => $day->format('D'),
+                'amount' => (int) ($byDay[$day->toDateString()] ?? 0),
+            ];
+        });
+    }
+
+    /** Top 5 products by qty sold at this branch over the past 30 days. */
+    private function topSellers(int $shopId, int $branchId, CarbonInterface $since): Collection
     {
         return SaleLine::query()
             ->join('sales', 'sales.id', '=', 'sale_lines.sale_id')
             ->join('products', 'products.id', '=', 'sale_lines.product_id')
             ->where('sale_lines.shop_id', $shopId)
             ->where('sale_lines.branch_id', $branchId)
-            ->where('sales.sold_at', '>=', $weekStart)
+            ->where('sales.sold_at', '>=', $since)
             ->where('sales.status', '!=', 'void')
             ->whereNull('sales.deleted_at')
             ->whereNull('sale_lines.deleted_at')
             ->groupBy('sale_lines.product_id', 'products.name')
-            ->selectRaw('sale_lines.product_id, products.name, coalesce(sum(sale_lines.qty), 0) as qty_sold, coalesce(sum(sale_lines.line_total), 0) as revenue')
+            ->selectRaw(
+                'sale_lines.product_id, products.name,'
+                .' coalesce(sum(sale_lines.qty), 0) as qty_sold,'
+                .' count(distinct sale_lines.sale_id) as sale_count,'
+                .' coalesce(sum(sale_lines.line_total), 0) as revenue'
+            )
             ->orderByDesc('qty_sold')
             ->limit(5)
             ->get();
+    }
+
+    /**
+     * Top saved customers by spend (excludes walk-ins / null customer_id).
+     * Shows past-30-day and past-1-year totals; ranked by year spend.
+     */
+    private function valuedCustomers(
+        int $shopId,
+        int $branchId,
+        CarbonInterface $days30,
+        CarbonInterface $yearStart,
+    ): Collection {
+        $yearAmounts = Sale::query()
+            ->where('shop_id', $shopId)
+            ->where('branch_id', $branchId)
+            ->whereNotNull('customer_id')
+            ->where('sold_at', '>=', $yearStart)
+            ->where('status', '!=', 'void')
+            ->groupBy('customer_id')
+            ->selectRaw('customer_id, coalesce(sum(total), 0) as amount')
+            ->pluck('amount', 'customer_id');
+
+        if ($yearAmounts->isEmpty()) {
+            return collect();
+        }
+
+        $monthAmounts = Sale::query()
+            ->where('shop_id', $shopId)
+            ->where('branch_id', $branchId)
+            ->whereIn('customer_id', $yearAmounts->keys())
+            ->where('sold_at', '>=', $days30)
+            ->where('status', '!=', 'void')
+            ->groupBy('customer_id')
+            ->selectRaw('customer_id, coalesce(sum(total), 0) as amount')
+            ->pluck('amount', 'customer_id');
+
+        $topIds = $yearAmounts->sortDesc()->keys()->take(10);
+
+        return Customer::query()
+            ->whereIn('id', $topIds)
+            ->get(['id', 'name', 'phone'])
+            ->map(function (Customer $customer) use ($yearAmounts, $monthAmounts) {
+                $customer->setAttribute('amount_30d', (int) ($monthAmounts[$customer->id] ?? 0));
+                $customer->setAttribute('amount_year', (int) ($yearAmounts[$customer->id] ?? 0));
+
+                return $customer;
+            })
+            ->sortByDesc('amount_year')
+            ->values();
     }
 }
