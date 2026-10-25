@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['shop_id', 'branch_id', 'sale_id', 'method', 'amount'])]
 class SalePayment extends Model
 {
+    use SoftDeletes;
+
     public const UPDATED_AT = null;
 
     protected function casts(): array

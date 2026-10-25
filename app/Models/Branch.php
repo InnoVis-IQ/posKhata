@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['shop_id', 'name', 'code', 'address', 'phone', 'is_default', 'is_active'])]
 class Branch extends Model
 {
+    use SoftDeletes;
+
     protected function casts(): array
     {
         return [

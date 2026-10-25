@@ -22,6 +22,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['shop_id', 'vendor_id', 'invoice_number']);
             $table->index(['branch_id', 'due_date']);
@@ -39,6 +40,7 @@ return new class extends Migration
             $table->bigInteger('tax_amount')->default(0);
             $table->bigInteger('line_total')->default(0);
 
+            $table->softDeletes();
             $table->index('purchase_invoice_id');
             $table->index('product_id');
         });
@@ -52,6 +54,7 @@ return new class extends Migration
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->text('notes')->nullable();
             $table->timestamp('created_at')->nullable();
+            $table->softDeletes();
         });
 
         Schema::create('purchase_receiving_lines', function (Blueprint $table) {
@@ -62,6 +65,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->decimal('qty', 12, 3);
             $table->bigInteger('unit_cost')->default(0);
+            $table->softDeletes();
         });
 
         Schema::create('purchase_returns', function (Blueprint $table) {
@@ -77,6 +81,7 @@ return new class extends Migration
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->text('notes')->nullable();
             $table->timestamp('created_at')->nullable();
+            $table->softDeletes();
         });
 
         Schema::create('purchase_return_lines', function (Blueprint $table) {
@@ -88,6 +93,7 @@ return new class extends Migration
             $table->decimal('qty', 12, 3);
             $table->bigInteger('unit_cost')->default(0);
             $table->bigInteger('line_total')->default(0);
+            $table->softDeletes();
         });
     }
 

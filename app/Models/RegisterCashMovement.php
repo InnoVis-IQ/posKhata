@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'shop_id', 'branch_id', 'register_session_id', 'direction', 'reason', 'amount',
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class RegisterCashMovement extends Model
 {
+    use SoftDeletes;
+
     public const UPDATED_AT = null;
 
     protected function casts(): array

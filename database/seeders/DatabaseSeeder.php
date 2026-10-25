@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Support\AuthIdentity;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -51,7 +52,7 @@ class DatabaseSeeder extends Seeder
             'shop_id' => $shopId,
             'branch_id' => $branchId,
             'name' => 'Superadmin',
-            'email' => 'superadmin@poskhata.local',
+            'email' => AuthIdentity::emailFromUsername('superadmin'),
             'email_verified_at' => $now,
             'password' => Hash::make('password'),
             'role' => 'superadmin',
@@ -85,14 +86,14 @@ class DatabaseSeeder extends Seeder
         }
 
         foreach ([
-            ['name' => 'Admin', 'email' => 'admin@poskhata.local', 'role' => 'admin'],
-            ['name' => 'Cashier', 'email' => 'cashier@poskhata.local', 'role' => 'cashier'],
+            ['name' => 'Admin', 'username' => 'admin', 'role' => 'admin'],
+            ['name' => 'Cashier', 'username' => 'cashier', 'role' => 'cashier'],
         ] as $staff) {
             $staffId = DB::table('users')->insertGetId([
                 'shop_id' => $shopId,
                 'branch_id' => $branchId,
                 'name' => $staff['name'],
-                'email' => $staff['email'],
+                'email' => AuthIdentity::emailFromUsername($staff['username']),
                 'email_verified_at' => $now,
                 'password' => Hash::make('password'),
                 'role' => $staff['role'],
@@ -109,4 +110,4 @@ class DatabaseSeeder extends Seeder
             ]);
         }
     }
-};
+}

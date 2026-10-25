@@ -15,7 +15,7 @@
                 <thead class="border-b border-line text-muted">
                     <tr>
                         <th class="px-4 py-3 font-medium">Name</th>
-                        <th class="px-4 py-3 font-medium">Email</th>
+                        <th class="px-4 py-3 font-medium">Username</th>
                         <th class="px-4 py-3 font-medium">Role</th>
                         <th class="px-4 py-3 font-medium"></th>
                     </tr>
@@ -24,7 +24,7 @@
                     @foreach ($users as $user)
                         <tr class="border-b border-line last:border-0">
                             <td class="px-4 py-3">{{ $user->name }}</td>
-                            <td class="px-4 py-3">{{ $user->email }}</td>
+                            <td class="px-4 py-3">{{ $user->username() }}</td>
                             <td class="px-4 py-3">{{ $user->role }}</td>
                             <td class="px-4 py-3 text-right"><a href="{{ route('users.edit', $user->id) }}" class="text-accent hover:underline">Edit</a></td>
                         </tr>

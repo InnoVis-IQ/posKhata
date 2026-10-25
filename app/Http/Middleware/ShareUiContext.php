@@ -31,7 +31,7 @@ class ShareUiContext
 
                 View::share('viewer', (object) [
                     'name' => $user->name,
-                    'email' => $user->email,
+                    'username' => $user->username(),
                     'role' => $user->role,
                 ]);
                 View::share('shop', $shop);
@@ -57,7 +57,7 @@ class ShareUiContext
 
         View::share('viewer', (object) [
             'name' => 'Guest',
-            'email' => '',
+            'username' => '',
             'role' => 'cashier',
         ]);
         View::share('shop', $shop ?? (object) [

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->text('note')->nullable();
             $table->timestamp('created_at')->nullable();
+            $table->softDeletes();
 
             $table->index(['vendor_id', 'paid_at']);
             $table->index(['reference_type', 'reference_id']);
@@ -35,6 +36,7 @@ return new class extends Migration
             $table->foreignId('purchase_invoice_id')->constrained()->cascadeOnDelete();
             $table->bigInteger('amount');
             $table->timestamp('created_at')->nullable();
+            $table->softDeletes();
 
             $table->index('purchase_invoice_id');
             $table->index('vendor_payment_id');

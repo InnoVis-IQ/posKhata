@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['shop_id', 'from_branch_id', 'to_branch_id', 'transferred_at', 'note', 'created_by'])]
 class StockTransfer extends Model
 {
+    use SoftDeletes;
+
     public const UPDATED_AT = null;
 
     protected function casts(): array

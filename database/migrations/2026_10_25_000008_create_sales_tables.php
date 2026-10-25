@@ -24,6 +24,7 @@ return new class extends Migration
             $table->foreignId('cashier_id')->constrained('users')->cascadeOnDelete();
             $table->text('notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['shop_id', 'sale_number']);
             $table->index(['branch_id', 'sold_at']);
@@ -42,6 +43,7 @@ return new class extends Migration
             $table->bigInteger('discount_amount')->default(0);
             $table->bigInteger('tax_amount')->default(0);
             $table->bigInteger('line_total')->default(0);
+            $table->softDeletes();
         });
 
         Schema::create('sale_payments', function (Blueprint $table) {
@@ -52,6 +54,7 @@ return new class extends Migration
             $table->string('method', 20);
             $table->bigInteger('amount');
             $table->timestamp('created_at')->nullable();
+            $table->softDeletes();
         });
     }
 

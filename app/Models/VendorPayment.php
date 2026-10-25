@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'shop_id', 'branch_id', 'vendor_id', 'amount', 'method', 'paid_at',
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class VendorPayment extends Model
 {
+    use SoftDeletes;
+
     public const UPDATED_AT = null;
 
     protected function casts(): array

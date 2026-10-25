@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamp('created_at')->nullable();
+            $table->softDeletes();
 
             $table->unique(['branch_id', 'user_id']);
         });

@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['shop_id', 'branch_id', 'purchase_return_id', 'product_id', 'qty', 'unit_cost', 'line_total'])]
 class PurchaseReturnLine extends Model
 {
+    use SoftDeletes;
+
     public $timestamps = false;
 
     protected function casts(): array

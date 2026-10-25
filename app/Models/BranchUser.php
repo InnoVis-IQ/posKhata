@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BranchUser extends Pivot
 {
+    use SoftDeletes;
+
     public const UPDATED_AT = null;
 
     protected $table = 'branch_user';

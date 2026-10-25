@@ -24,6 +24,7 @@ return new class extends Migration
             $table->bigInteger('tax_total')->default(0);
             $table->bigInteger('total')->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('sale_refund_lines', function (Blueprint $table) {
@@ -35,6 +36,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->decimal('qty', 12, 3);
             $table->bigInteger('amount')->default(0);
+            $table->softDeletes();
         });
 
         Schema::create('sale_refund_payments', function (Blueprint $table) {
@@ -46,6 +48,7 @@ return new class extends Migration
             $table->bigInteger('amount');
             $table->foreignId('register_session_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamp('created_at')->nullable();
+            $table->softDeletes();
         });
     }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LogController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
@@ -91,5 +92,8 @@ Route::middleware(ShareUiContext::class)->group(function () {
 
         Route::get('/reports/day-sales', [ReportController::class, 'daySales'])->name('reports.day-sales');
         Route::get('/reports/payables', [ReportController::class, 'payables'])->name('reports.payables');
+
+        Route::get('/logs/stock', [LogController::class, 'stock'])->name('logs.stock');
+        Route::get('/logs/payments', [LogController::class, 'payments'])->name('logs.payments');
     });
 });

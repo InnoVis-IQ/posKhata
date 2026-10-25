@@ -114,4 +114,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Username Email Domain
+    |--------------------------------------------------------------------------
+    |
+    | Users sign in with a username only. Laravel still requires a unique email
+    | column, so this domain is appended server-side and never shown in the UI.
+    |
+    */
+
+    'username_domain' => env('AUTH_USERNAME_DOMAIN', 'poskhata.innovisiq.com'),
+
 ];

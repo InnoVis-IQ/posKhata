@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\GatesRoles;
 use App\Models\Branch;
 use App\Models\User;
+use App\Support\AuthIdentity;
 use App\Support\PosContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class UserController extends Controller implements HasMiddleware
@@ -133,7 +135,7 @@ class UserController extends Controller implements HasMiddleware
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user?->id)],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z0-9._-]+$/'],
             'password' => [$user ? 'nullable' : 'required', 'string', 'min:6', 'max:255'],
             'role' => [$user?->isSuperadmin() ? 'nullable' : 'required', Rule::in([User::ROLE_ADMIN, User::ROLE_CASHIER])],
             'branch_id' => ['required', 'integer', $branchRule],
@@ -141,6 +143,19 @@ class UserController extends Controller implements HasMiddleware
             'branch_ids.*' => ['integer', $branchRule],
         ]);
 
+        $email = AuthIdentity::emailFromUsername($data['username']);
+        $taken = User::withoutSuperadminScope()
+            ->where('email', $email)
+            ->when($user, fn ($q) => $q->where('id', '!=', $user->id))
+            ->exists();
+        if ($taken) {
+            throw ValidationException::withMessages([
+                'username' => 'This username is already taken.',
+            ]);
+        }
+
+        unset($data['username']);
+        $data['email'] = $email;
         $data['is_active'] = $request->boolean('is_active');
 
         return $data;

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('customers', function (Blueprint $table) {
@@ -30,6 +31,7 @@ return new class extends Migration
             $table->bigInteger('khaata_warning_amount')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['shop_id', 'phone']);
         });

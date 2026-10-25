@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('note')->nullable();
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->timestamp('created_at')->nullable();
+            $table->softDeletes();
         });
 
         Schema::create('stock_transfer_lines', function (Blueprint $table) {
@@ -25,6 +26,7 @@ return new class extends Migration
             $table->foreignId('stock_transfer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->decimal('qty', 12, 3);
+            $table->softDeletes();
         });
 
         Schema::create('stock_ledger_entries', function (Blueprint $table) {
@@ -40,6 +42,7 @@ return new class extends Migration
             $table->text('note')->nullable();
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->timestamp('created_at')->nullable();
+            $table->softDeletes();
 
             $table->index(['branch_id', 'product_id', 'created_at']);
             $table->index(['reference_type', 'reference_id']);

@@ -24,6 +24,7 @@ return new class extends Migration
             $table->foreignId('reopened_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('reopened_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['branch_id', 'status']);
             $table->index(['branch_id', 'opened_at']);
@@ -42,6 +43,7 @@ return new class extends Migration
             $table->text('note')->nullable();
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->timestamp('created_at')->nullable();
+            $table->softDeletes();
 
             $table->index(['reference_type', 'reference_id']);
         });

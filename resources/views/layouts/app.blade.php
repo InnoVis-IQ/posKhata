@@ -53,6 +53,8 @@
                     <a href="{{ route('settings.edit') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Settings</a>
                     <a href="{{ route('reports.day-sales') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Day sales</a>
                     <a href="{{ route('reports.payables') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Payables</a>
+                    <a href="{{ route('logs.stock') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Stock log</a>
+                    <a href="{{ route('logs.payments') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Payment log</a>
                 @else
                     <a href="{{ route('refunds.create') }}" class="block rounded-lg px-3 py-2 hover:bg-surface">Request refund</a>
                 @endif

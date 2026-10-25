@@ -26,6 +26,7 @@ return new class extends Migration
             $table->bigInteger('default_khaata_warning_amount')->default(0);
             $table->boolean('multi_branch_enabled')->default(false);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('branches', function (Blueprint $table) {
@@ -38,6 +39,7 @@ return new class extends Migration
             $table->boolean('is_default')->default(false);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['shop_id', 'code']);
             $table->index(['shop_id', 'is_default']);
@@ -55,6 +57,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['shop_id', 'role']);
             $table->index('role');

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('code', 50);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['shop_id', 'code']);
             $table->index(['shop_id', 'name']);
@@ -28,6 +29,7 @@ return new class extends Migration
             $table->integer('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['shop_id', 'name']);
         });
@@ -50,6 +52,7 @@ return new class extends Migration
             $table->decimal('reorder_level', 12, 3)->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['shop_id', 'sku']);
             $table->unique(['shop_id', 'barcode']);

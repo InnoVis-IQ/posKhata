@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\AuthIdentity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,20 +23,25 @@ class AuthController extends Controller
     public function login(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'username' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string'],
         ]);
 
+        $email = AuthIdentity::emailFromUsername($credentials['username']);
+
         // Unscoped lookup so superadmin can sign in.
         $user = User::withoutSuperadminScope()
-            ->where('email', $credentials['email'])
+            ->where('email', $email)
             ->where('is_active', true)
             ->first();
 
-        if (! $user || ! Auth::getProvider()->validateCredentials($user, $credentials)) {
+        if (! $user || ! Auth::getProvider()->validateCredentials($user, [
+            'email' => $email,
+            'password' => $credentials['password'],
+        ])) {
             return back()
-                ->withErrors(['email' => 'Invalid credentials.'])
-                ->onlyInput('email');
+                ->withErrors(['username' => 'Invalid credentials.'])
+                ->onlyInput('username');
         }
 
         Auth::login($user, $request->boolean('remember'));

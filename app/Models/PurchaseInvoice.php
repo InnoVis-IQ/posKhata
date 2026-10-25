@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'shop_id', 'branch_id', 'vendor_id', 'invoice_number', 'invoice_date', 'due_date',
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class PurchaseInvoice extends Model
 {
+    use SoftDeletes;
+
     protected function casts(): array
     {
         return [

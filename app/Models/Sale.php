@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'shop_id', 'branch_id', 'customer_id', 'register_session_id', 'sale_number', 'status',
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Sale extends Model
 {
+    use SoftDeletes;
+
     protected function casts(): array
     {
         return [

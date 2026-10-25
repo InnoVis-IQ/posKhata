@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->text('note')->nullable();
             $table->timestamp('created_at')->nullable();
+            $table->softDeletes();
 
             $table->unique(['shop_id', 'receipt_number']);
             $table->index(['customer_id', 'received_at']);
@@ -40,6 +41,7 @@ return new class extends Migration
             $table->text('note')->nullable();
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->timestamp('created_at')->nullable();
+            $table->softDeletes();
 
             $table->index(['customer_id', 'created_at']);
             $table->index(['reference_type', 'reference_id']);
